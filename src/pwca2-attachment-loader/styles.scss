@@ -1,0 +1,126 @@
+@import '@servicenow/sass-kit/host';
+
+.loader-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 30px;
+}
+
+.files-list {
+  list-style-type: none;
+  padding: 0 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.toRemoveFileLine {
+  background-color: #BA2620;
+  color: #fff;
+  border: 1px solid #F1D4D2;
+}
+
+.toAddFileLine {
+  background-color: #20ba8e;
+  color: #fff;
+  border: 1px solid #F1D4D2;
+}
+
+.fetchedFileLine {
+  background-color: #9d9a9a;
+  border: 1px solid #201e1e;
+}
+
+.fileLine {
+  width: 100%;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: row;
+  border-radius: 0.15rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: row;  
+  align-items: center;
+  gap: 5px;
+}
+
+.fileActions {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.illustation-text {
+  text-align: center;
+  font-weight: 550px;
+  font-size: 12pt;
+}
+
+
+.file-upload-form {
+  padding: 5px;
+  min-width: 60%;
+}
+
+.input-file-upload {
+  display: none;
+}
+
+
+.file-upload-label {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;    
+  border-width: 2px;
+  border-radius: 0.25rem;
+  border-style: dashed;
+  border-color: #000;
+}
+
+.drag-active {
+  background-color: lightgray;
+}
+
+.input-file-upload-text {
+  color: blue;
+  font-weight: 600;
+}
+
+.input-file-upload-text:hover {
+  text-decoration: underline;
+}
+
+.file-upload-section {
+  display: flex;
+  flex-direction: column;    
+  min-height: 100vh;
+  width: 60%;
+}
+
+.drag-file-element {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+
+.file-type-title {
+  padding: 5px 0;
+  font-style: italic;
+}
+
+.file-action-icon:hover {
+  transform: scale(1.25);
+  transition: all 0.5s linear;
+}

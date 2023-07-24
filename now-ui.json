@@ -1,0 +1,338 @@
+{
+	"components": {
+	    "pwca2-component-generation": {
+			"innerComponents": [
+				"now-heading", 
+				"now-dropdown", 
+				"now-textarea", 
+				"now-input", 
+				"now-radio-buttons", 
+				"now-checkbox", 
+				"now-toggle", 
+				"now-rich-text", 
+				"now-loader",
+				"now-alert",
+				"now-template-message",
+				"now-button",
+				"now-card",				
+				"now-illustration",
+				"now-button"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Component Generation",
+				"icon": "puzzle-outline",
+				"description": "Generate components from id only",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "type",
+					"label": "Type",
+					"description": "",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": false,
+					"defaultValue": ""
+				},
+				{
+					"name": "compid",
+					"label": "Component ID",
+					"description": "",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": "87a5632397b06110b98432e3f153af67"
+				}
+			]
+	    },
+		"pwca2-collapsible-sidebar": {
+			"innerComponents": [
+				"now-loader",
+				"now-image",
+				"now-icon"
+			],
+			"actions": [
+				{
+					"action": "PWC_SIDEBAR_COLLAPSE_ACTION",
+					"label": "PwC Collapse Action"
+				}
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Collapsible Sidebar",
+				"icon": "record-activity-stream-fill",
+				"description": "Collapsible sidebar",
+				"category": "primitives"
+			},
+			"properties": [
+				{
+					"name": "page",
+					"label": "Selected Page",
+					"description": "",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name":"sidebarData",
+					"label":"Sidebar Data",
+					"fieldType":"json",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"array",
+						  "items":{
+							 "type":"object",
+							 "properties":{
+								"id":{
+								   "type":[
+									  "string",
+									  "number"
+								   ]
+								},
+								"label":{
+								   "type":"string",
+								   "translatable":true
+								},
+								"url":{
+									"type":"string"
+								},
+								"icon_name":{
+								   "type":"string"
+								},
+								"new_items":{
+								   "type":"boolean"
+								},
+								"record_count":{
+									"type":"number"
+								}
+							 }
+						  }
+					   },
+					   "emptyStateBehavior":"EMPTY_ARRAY"
+					},
+					"defaultValue":"[{\"label\":\"Dashboard\",\"id\":\"dashboard\",\"url\":\"dashboard\",\"icon_name\":\"home-outline\",\"new_items\":false,\"record_count\":0},{\"label\":\"Projects\",\"id\":\"projects\",\"url\":\"projects\",\"icon_name\":\"document-outline\",\"new_items\":true,\"record_count\":25},{\"label\":\"Reports\",\"id\":\"reports\",\"url\":\"reports\",\"icon_name\":\"circle-chevron-down-outline\",\"new_items\":false,\"record_count\":0},{\"label\":\"Support\",\"id\":\"support\",\"url\":\"support\",\"icon_name\":\"circle-question-outline\",\"new_items\":false,\"record_count\":0}]",
+					"description":"Array of objects containing sidebar menu",
+					"valueType":"string",
+					"required": true
+				 }
+			]
+		},		
+		"pwca2-component-generation-v2": {
+			"innerComponents": [
+				"now-heading", 
+				"now-dropdown", 
+				"now-textarea", 
+				"now-input", 
+				"now-radio-buttons", 
+				"now-checkbox", 
+				"now-toggle", 
+				"now-rich-text", 
+				"now-loader",
+				"now-alert",
+				"now-template-message",
+				"now-button",
+				"now-card",				
+				"now-illustration",
+				"now-button",
+				"now-alert",
+				"now-typeahead",
+				"now-template-card",
+				"now-icon",
+				"now-select",
+				"now-label-value"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Component Generation v2",
+				"icon": "puzzle-outline",
+				"description": "Generate components from JSON property",
+				"category": "primitives"
+			},			
+			"actions": [
+				{
+					"action": "PWC_COMPONENT_GENERATION_SUBMIT_ACTION",
+					"label": "PwC Component Generation Submit Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_SAVE_ACTION",
+					"label": "PwC Component Generation Save Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_ALERT_ACTION",
+					"label": "PwC Component Generation ALERT Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_COMP_STATE_UPDATE_ACTION",
+					"label": "PwC Component Generation Component State Update Action"
+				}
+			],
+			"properties": [
+				{
+					"name":"compdata",
+					"label":"Component Data",
+					"fieldType": "json",
+					"readOnly": false,
+					"typeMetadata": {
+					   "schema": {
+						  "type": "object",
+						  "properties": {
+							"status": {
+								"type": "number"
+							},
+							"error": {
+								"type": "string"
+							},
+							"table": {
+								"type": "string"
+							},
+							"sys_id": {
+								"type": "string"
+							}, 
+							"name": {
+								"type": "string"
+							}, 
+							"question_sets": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+									   "name": {
+										  "type": "string"
+									   },
+									   "questions": {
+										  "type": "array",
+										  "items": {										
+											"type": "object",
+											"properties": {
+
+											}
+										  }
+									   }
+									}
+								}
+							}
+						  }
+					   }
+					},
+					"defaultValue": "{}",
+					"description":"Array of objects containing component data",
+					"valueType":"string",
+					"mandatory": true
+				},
+				{
+					"name":"disabled",
+					"label":"Disabled",
+					"fieldType":"boolean",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"boolean"
+					   }
+					},
+					"defaultValue":false,
+					"description": "Disables the question form",
+					"selectable":false,
+					"valueType":"string",
+					"mandatory":false
+				},
+				{
+					"name": "state",
+					"label": "State",
+					"description": "State of the component",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				}
+			]
+	    },
+		"pwca2-attachment-loader": {
+	        "innerComponents": [
+				"now-template-card",
+				"now-icon",
+				"now-loader",
+				"now-illustration"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Attachment Loader",
+				"icon": "paperclip-outline",
+				"description": "Component to upload files and save them at ServiceNow. Data is going to be converted to binay and going to be sent to ServiceNow Attachment API.",
+				"category": "primitives"				
+			}, 
+			"properties": [
+				{
+					"name": "tableName",
+					"label": "Table Name",
+					"description": "Table Name of the Record where file is going to be attached",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				}, 
+				{
+					"name": "recordID",
+					"label": "Record System ID",
+					"description": "ID of the record where file is going to be attached",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name": "toUpdate",
+					"label": "Action to Upload or Remove attachment",
+					"fieldType":"boolean",
+					"readOnly": false,
+					"typeMetadata": {
+					   "schema": {
+						  "type": "boolean"
+					   }
+					},
+					"defaultValue": true,
+					"description": "Action to Upload or Remove attachment through Attachment API",
+					"selectable": false,
+					"valueType": "string",
+					"mandatory": true
+				},
+				{
+					"name":"attachedFiles",
+					"label":"Attached Files",
+					"fieldType": "json",
+					"readOnly": false,
+					"typeMetadata": {
+					   "schema": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"attachmentName": {
+										"type": "string"
+									},
+									"attachmentID": {
+										"type": "string"
+									},
+									"icon": {
+										"type": "string"
+									},
+									"state": {
+										"type": "string"
+									}
+								}
+							}
+						  
+					   }
+					},
+					"defaultValue": "[]",
+					"description":"Attachments property",
+					"valueType":"string",
+					"required": false
+				}
+			]
+	    }
+	},
+	"scopeName": "x_pwca2_0011243"
+}

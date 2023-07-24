@@ -1,0 +1,1 @@
+import "./comp-gen-v2";
