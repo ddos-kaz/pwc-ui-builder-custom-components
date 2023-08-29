@@ -9,7 +9,6 @@ import '@servicenow/now-toggle';
 import '@servicenow/now-template-message';
 import '@servicenow/now-rich-text';
 import '@servicenow/now-loader';
-import '@servicenow/now-alert';
 import '@servicenow/now-card';
 import '@servicenow/now-illustration';
 import '@servicenow/now-button';
@@ -19,7 +18,9 @@ import '@servicenow/now-icon';
 import '@servicenow/now-select';
 import '@servicenow/now-label-value';
 import '@servicenow/now-tooltip';
-
+import '@servicenow/now-pill';
+//import '@servicenow/now-modal';
+import { createRef } from '@servicenow/ui-renderer-snabbdom';
 
 import { ATTACHMENT_URL } from "./constants";
 
@@ -38,7 +39,7 @@ const getIndexByID = (list, id) => {
     return -1;
 }
 
-const fileElementLine = (file, isNew, recordID, state, updateState, disabled) => {
+const fileElementLine = (file, isNew, recordID, state, updateState, disabled, dispatch) => {
     const fileName = file.name;
     const fileID = file.id;
     let fileIcon = "paperclip-outline";
@@ -78,7 +79,7 @@ const fileElementLine = (file, isNew, recordID, state, updateState, disabled) =>
                     toAddFiles: copyToAddFiles
                 });
             } else {
-                const copyAllAttachedFiles = JSON.parse(JSON.stringify(allAttachedFiles));
+                /* const copyAllAttachedFiles = JSON.parse(JSON.stringify(allAttachedFiles));
                 copyAllAttachedFiles[recordID][index]["state"] = "removed";
 
                 const copyToRemoveFiles = [...toRemoveFiles];
@@ -87,7 +88,19 @@ const fileElementLine = (file, isNew, recordID, state, updateState, disabled) =>
                 updateState({
                     toRemoveFiles: copyToRemoveFiles,
                     allAttachedFiles: copyAllAttachedFiles
-                });
+                }); */
+
+                if (confirm(`Do you want to delete ${list[index].name}?`)) {
+                    const copyAllAttachedFiles = [...allAttachedFiles];
+                    copyAllAttachedFiles.splice(index, 1);
+
+                    updateState({
+                        toRemoveFile: list[index],
+                        allAttachedFiles: copyAllAttachedFiles
+                    });
+
+                    dispatch("DELETE_FILE_ACTION");
+                }
             }
         } else {
             alert("The file can't be removed...");
@@ -150,15 +163,15 @@ const fileElementLine = (file, isNew, recordID, state, updateState, disabled) =>
     );
 };
 
-const fileElementsList = (files, isNew, recordID, state, updateState, disabled) => {
+const fileElementsList = (files, isNew, recordID, state, updateState, disabled, dispatch) => {
     return (
         <ul className="files-list">
-            {files.map(file => fileElementLine(file, isNew, recordID, state, updateState, disabled))}
+            {files.map(file => fileElementLine(file, isNew, recordID, state, updateState, disabled, dispatch))}
         </ul>
     );
 };
 
-const dragDropFileForm = (updateState, state, attachmentConfig, disabled) => {
+const dragDropFileForm = (updateState, state, attachmentConfig, disabled, readOnly, dispatch) => {
     const { recordID, tableName, maxFileSize, allowedFileTypes } = attachmentConfig;
     const allowedFileTypesArr = allowedFileTypes.split(',');
 
@@ -251,7 +264,7 @@ const dragDropFileForm = (updateState, state, attachmentConfig, disabled) => {
     
     return (
         <form className="file-upload-form" ondragenter={handleDrag} onsubmit={(e) => e.preventDefault()}>
-            {!disabled ? (
+            {(!disabled && !readOnly) ? (
                 <div>
                     <input type="file" id={recordID} className="input-file-upload" multiple="true" on-change={handleChange}/>
                     <label for={recordID}  className={dragActive ? "file-upload-label drag-active" : "file-upload-label"}>
@@ -283,7 +296,7 @@ const dragDropFileForm = (updateState, state, attachmentConfig, disabled) => {
             {(filteredToAddFiles.length != 0) ? (
                 <div>
                     <span className="file-type-title">Loaded files:</span>
-                    {fileElementsList(filteredToAddFiles, true, recordID, state, updateState, disabled)}
+                    {fileElementsList(filteredToAddFiles, true, recordID, state, updateState, disabled, dispatch)}
                 </div>                
             ) : (
                 <div></div>
@@ -292,7 +305,7 @@ const dragDropFileForm = (updateState, state, attachmentConfig, disabled) => {
             {(attachedFiles.length != 0) ? (
                 <div>                 
                     <div className="file-type-title">Attached files:</div>
-                    {fileElementsList(attachedFiles, false, recordID, state, updateState, disabled)}
+                    {fileElementsList(attachedFiles, false, recordID, state, updateState, disabled, dispatch)}
                 </div>
             ) : (
                 <div></div>
@@ -301,9 +314,76 @@ const dragDropFileForm = (updateState, state, attachmentConfig, disabled) => {
     );
 };
 
-const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
+const buildRequiredQuestionPill = (question) => {
+    const focusTextInput = () => {    
+        question.ref.current.focus();
+    };
+    //<input type="button" value={question.label} />
+    return (
+      <span className="pwc-pill">
+        <button on-click={focusTextInput} id={`pill-${question.id}`} type="button" className="pwc-pill-button" aria-pressed="false">            
+            <span className="pwc-pill-button-label" title={question.label} aria-hidden="true">
+                {question.label}
+            </span>
+        </button>
+      </span>  
+    );
+};
+
+const buildRequiredQuestionsCard = ( state ) => {
+    const { filteredComponentData, filteredRequiredQuestions, isTaskTable, isProjectTable } = state;
+    let requiredQuestions = [];
+    const { question_sets } = filteredComponentData;
+
+    question_sets.forEach((question_set) => {
+        const { questions } = question_set;
+        requiredQuestions = questions.reduce((acc, question) => {
+            if (filteredRequiredQuestions.includes(question.id)) {
+                
+                return [...acc, {
+                    "id": question.id,
+                    "label": question.label,
+                    "ref": question.ref
+                }]
+            }
+
+            return acc;
+        }, [...requiredQuestions]);
+    });    
+
+    let title = "";
+    if (isTaskTable) {
+        title = "Click on this guidance to see what information are mandatory and needs to be filled out, before the 'Complete Task' button gets activated.";
+    } else if (isProjectTable) {
+        title = "Click on this guidance to see what information are mandatory and needs to be filled out.";
+    }
+    //<now-pill size="md" label={requiredQuestion.label} icon="" component-id={`pill-${requiredQuestion.id}`} id={`pill-${requiredQuestion.id}`} show-identifier={true} avatar-props={{}}></now-pill>
+    return (
+        <div className="required-questions-card-container">
+            {requiredQuestions.length != 0 ? (
+                <div className="required-questions-card-title">                
+                    <now-alert status="critical" icon="info-circle-outline" header="Almost there!" content={title} text-link-props={{}} action={{}}></now-alert>
+                </div>
+            ) : (
+                <div></div>
+            )}            
+            <div className="required-questions-container">
+                {requiredQuestions.map((requiredQuestion) => {
+                    return (
+                        <div>
+                            {buildRequiredQuestionPill(requiredQuestion)}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );           
+};
+
+
+const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch ) => {
     const { questions } = question_set;
-    const { referenceOptions } = state;
+    const { referenceOptions, questionSearchTables, displayRemoveFileModal } = state;
     /* let qs_name = name.toString();
 
     if (question_set.hideLabel) {
@@ -316,43 +396,55 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
     */
    
     return (
-        <now-card size="md" interaction="none" className="pwc-now-card">                        
+        <now-card size="md" interaction="none" hide-shadow={true} className="pwc-now-card">                        
             <ul>
                 {questions.map((question) => {
                     
                     let required = false;
-
+                    const questionLabel = (question.hideLabel == true || question.hideLabel == "true") ? "" : question.label;
+                    
                     if (question.required.toString() == 'true') {
-                        required = true;
+                        if (question.type== "pwc-attachment") {
+                            if (question.value.hasOwnProperty("attachedFiles") && question.value.attachedFiles.length == 0) {
+                                required = true;
+                            }                            
+                        } else {
+                            required = true;
+                        }               
                     }
                     
                     if (disabled || question.readOnly.toString() == 'true') {
                         required = false;
                     }
+
+                    /* if (question.readOnly.toString() == 'true') {
+                        disabled = true;
+                    } */
                     
                     if (question.type == "pwc-attachment") {
                         const { maxFileSize } = question.value;
                         let { allowedFileTypes } = question.value;
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
                         allowedFileTypes = allowedFileTypes.toUpperCase().split(',');
 
                         return (
                             <li>
                                 <div className="file-upload-section">
                                     <div className="flex-row-container">
-                                        <span className="pwc-label-size"><b>{question.label}</b></span>
+                                        <span className="pwc-label-size"><b>{questionLabel}</b></span>
 
                                         {!hasToolTip ? (
                                             <div>                                                        
                                             </div>
                                         ) : (
                                             <div>
-                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                             </div>
                                         )} 
                                     </div>
-                                    {question.required && !disabled ? (
+                                    {required && !disabled ? (
                                         <span className="redTextColor">File attachment is required</span>
                                     ) : (
                                         <span></span>
@@ -363,29 +455,38 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                     ) : (
                                         <span></span>
                                     )}
-                                    
-                                    {dragDropFileForm(updateState, state, question.value, disabled)}
+                                                                        
+                                    {dragDropFileForm(updateState, state, question.value, disabled, question.readOnly, dispatch)}                                                                   
                                 </div>
                             </li>
                         );
-                    }
+                    } 
+
+                    /*
+                        {displayRemoveFileModal ? (
+                            <now-modal size="sm" header-label="Modal header" content="This is modal text content." footer-actions={[{"label":"Delete","variant":"primary-negative"},{"label":"Cancel","variant":"secondary"}]} opened={true}></now-modal>
+                        ) : (
+                            <span></span>
+                        )}
+                    */
 
                     if (question.type == "now-heading") {
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
 
                         if (question.properties.size == "title-tertiary") {
                             return (                                
                                 <li>
                                     <div className="flex-row-container">
-                                        <p id={question.id}>{question.label}</p>
+                                        <p id={question.id}>{questionLabel}</p>
 
                                         {!hasToolTip ? (
                                             <div>                                                        
                                             </div>
                                         ) : (
                                             <div>
-                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                             </div>
                                         )}      
                                     </div>                                    
@@ -396,7 +497,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                         return (
                             <li>
                                 <div className="flex-row-container">
-                                    <now-heading component-id={question.id} id={question.id} label={question.label} level="1" variant={question.properties.size} has-no-margin={true}></now-heading>
+                                    <now-heading component-id={question.id} id={question.id} label={questionLabel} level="1" variant={question.properties.size} has-no-margin={true}></now-heading>
                                         
                                     {!hasToolTip ? (
                                         <div>                                                        
@@ -404,7 +505,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                     ) : (
                                         <div>
                                             <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                         </div>
                                     )} 
                                 </div>                                                                    
@@ -424,6 +525,14 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                         const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        let selectedItems = "";                        
+
+                        if (Array.isArray(question.value)) {
+                            selectedItems = question.value.join(",");
+                        } else if (question.value != "" && question.value != null) {
+                            selectedItems = question.value;
+                        }                                                                      
 
                         return ( 
                             <li>
@@ -434,67 +543,166 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                             </div>
                                         ) : (
                                             <div className="flex-row-container">                                        
-                                                <span className={labelClassName}>{question.label}</span>
+                                                <span className={labelClassName}>{questionLabel}</span>
                                                 {!hasToolTip ? (
                                                     <div>                                                        
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                                     </div>
                                                 )}                                                
                                             </div>                                                                        
                                         )
                                     }
                                     
-                                    <now-dropdown className="halfWidth" component-id={question.id}  id={question.id} disabled={disabled || question.readOnly} items={question.options} selected-items={question.value} select="single" placeholder={question.properties.placeholder} icon="" variant={question.properties.variant} size={question.properties.size} tooltip-content={question.properties.tooltip} panel-fit-props={{}}></now-dropdown>
+                                    <now-dropdown ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} disabled={disabled || question.readOnly} items={question.options} selected-items={selectedItems.split(",")} select="single" placeholder={question.properties.placeholder} icon="" variant={question.properties.variant} size={question.properties.size} panel-fit-props={{}}></now-dropdown>
                                 </div>                                
                             </li>
                         );
                     }
 
                     if (question.type == "now-select") {
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+
                         return ( question.has_message ? (                            
                                 <li>
-                                    <now-select className="halfWidth" component-id={question.id}  id={question.id} search="none" helper-content={question.properties.tooltip} items={question.options} label={question.label} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} selected-item={question.value} required={required}></now-select>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-select ref={question.ref} disabled={disabled || question.readOnly} className="halfWidth" component-id={question.id}  id={question.id} search="none" items={question.options} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} selected-item={question.value}></now-select>
+                                    </div>                                    
                                 </li>
                             ) : (
                                 <li>
-                                    <now-select className="halfWidth" component-id={question.id}  id={question.id} search="none" helper-content={question.properties.tooltip} items={question.options} label={question.label} messages={[]} selected-item={question.value} required={required}></now-select>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-select ref={question.ref} className="halfWidth" disabled={disabled || question.readOnly} component-id={question.id}  id={question.id} search="none" items={question.options} label={""} messages={[]} selected-item={question.value}></now-select>
+                                    </div>                                    
                                 </li>
                             )                            
                         );
                     }
 
                     if (question.type == "now-typeahead") {
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+
                         if (disabled) {
                             const inputValue = question.value != "" ? question.properties.placeholder : "";
                             return ( question.has_message ? (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={question.label} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={inputValue}></now-input> 
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={tooltip} label={questionLabel} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={inputValue}></now-input> 
                                     </li>
                                 ) : (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={question.label} type="text" value={inputValue}></now-input> 
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={tooltip} label={questionLabel} type="text" value={inputValue}></now-input> 
                                     </li>                                    
                                 )                            
                             );
                         }
 
                         let typeaheadQuestionValue = question.value;
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        
 
                         const type = question.properties.type;
-                        const options = type == "search" ? referenceOptions : question.options;
-
+                        const options = type == "search" ? questionSearchTables[question.id].options : question.options; //referenceOptions
+                        
                         return (                            
                             question.has_message ? (
                                 <li>
-                                    <now-typeahead className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} required={required} label={question.label} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                    </div>                                    
                                 </li>
                             ) : (
                                 <li>
-                                    <now-typeahead className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} required={required} label={question.label} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                    </div>                                    
                                 </li>
                             )
                         );
@@ -502,54 +710,277 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
 
                     if (question.type == "now-typeahead-multi") {
                         if (disabled) {
+                            const inputValue = question.value != "" ? question.properties.placeholder : "";
+
                             return ( question.has_message ? (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={question.label} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={question.value}></now-input> 
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={questionLabel} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={inputValue}></now-input> 
                                     </li>
                                 ) : (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={question.label} type="text" value={question.value}></now-input> 
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={questionLabel} type="text" value={inputValue}></now-input> 
                                     </li>                                    
                                 )                            
                             );
                         }                        
 
                         const type = question.properties.type;
-                        const options = type == "search" ? referenceOptions : question.options;
-
+                        const options = type == "search" ? questionSearchTables[question.id].options : question.options; //referenceOptions
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
 
                         return (                            
                             question.has_message ? (
                                 <li>
-                                    <now-typeahead-multi className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" required={required} items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={question.label} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi> 
+                                    </div>                                
                                 </li>
                             ) : (
                                 <li>
-                                    <now-typeahead-multi className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" required={required} items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={question.label} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+                                        
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi>
+                                    </div>                                     
                                 </li>
                             )
                         );
                     }
 
-                    if (question.type == "now-input") {
+                    if (question.type == "now-input") {       
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+
                         return ( question.has_message ? (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size={question.properties.size} helper-content={question.properties.tooltip} label={question.label} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={question.value} required={required}></now-input> 
+                                        <div className="flex-column-container">
+                                            {
+                                                hideLabel ? (
+                                                    <div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex-row-container">                                        
+                                                        <span className={labelClassName}>{questionLabel}</span>
+                                                        {!hasToolTip ? (
+                                                            <div>                                                        
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                            </div>
+                                                        )}                                                
+                                                    </div>                                                                        
+                                                )
+                                            }
+
+                                            <div>
+                                                {question.properties.type == "date" ? (
+                                                    <now-input ref={question.ref} className="halfWidth" max="2030-02-20" component-id={question.id} id={question.id} readonly={disabled || question.readOnly} size={question.properties.size} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={question.value}></now-input> 
+                                                ) : (
+                                                    <now-input ref={question.ref} className="halfWidth" max="2030-02-20" component-id={question.id} id={question.id} readonly={disabled || question.readOnly} size={question.properties.size} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={question.value}></now-input> 
+                                                )}   
+                                            </div>                                                                                     
+                                        </div>
                                     </li>
                                 ) : (
                                     <li>
-                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size={question.properties.size} helper-content={question.properties.tooltip} label={question.label} placeholder={question.properties.placeholder} step="any" type={question.properties.type} value={question.value} required={required}></now-input> 
+                                        <div className="flex-column-container">
+                                            {
+                                                hideLabel ? (
+                                                    <div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex-row-container">                                        
+                                                        <span className={labelClassName}>{questionLabel}</span>
+                                                        {!hasToolTip ? (
+                                                            <div>                                                        
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                                <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                            </div>
+                                                        )}                                                
+                                                    </div>                                                                        
+                                                )
+                                            }
+                                                                                        
+                                            <now-input ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size={question.properties.size} placeholder={question.properties.placeholder} step="any" type={question.properties.type} value={question.value}></now-input>
+                                        </div>                                        
                                     </li>                                    
                                 )                            
                         );
                     }
                     
                     if (question.type == "now-dropdown:multi") {
+                        if (disabled) {
+                            return ( question.has_message ? (
+                                    <li>
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={questionLabel} placeholder={question.properties.placeholder} step="any" type={question.properties.type} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} value={question.value}></now-input> 
+                                    </li>
+                                ) : (
+                                    <li>
+                                        <now-input className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} helper-content={question.properties.tooltip} label={questionLabel} type="text" value={question.value}></now-input> 
+                                    </li>                                    
+                                )                            
+                            );
+                        }
+
                         const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
-                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false; 
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";                       
+                        let selectedItems = "";                        
+
+                        if (Array.isArray(question.value)) {                            
+                            selectedItems = question.value.join(",");
+                        } else if (question.value != "" && question.value != null){
+                            selectedItems = question.value;
+                        }
 
                         return ( 
+                            <li>
+                                <div className="flex-column-container" id={question.id}>
+                                    {
+                                        hideLabel ? (
+                                            <div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex-row-container">                                        
+                                                <span className={labelClassName}>{questionLabel}</span>
+                                                {!hasToolTip ? (
+                                                    <div>                                                        
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                    </div>
+                                                )}                                                
+                                            </div>                                                                        
+                                        )
+                                    }
+                                    
+                                    <now-dropdown ref={question.ref} className="halfWidth" component-id={question.id}  disabled={disabled || question.readOnly} items={question.options} selected-items={selectedItems.split(",")} select="multi" placeholder={question.properties.placeholder} icon="" variant={question.properties.variant} size={question.properties.size} tooltip-content={question.properties.tooltip} panel-fit-props={{}}></now-dropdown>
+                                </div>                                
+                            </li>
+                        );
+                    }
+
+                    if (question.type == "now-textarea") {                             
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false; 
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size";
+                        
+                        return (
+                            question.has_message ? (
+                                <li>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+
+                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} readonly={disabled || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} resize={question.properties.resize} show-counter={question.properties.show_counter}></now-textarea>
+                                    </div>                                    
+                                </li>
+                            ) : (
+                                <li>
+                                    <div className="flex-column-container">
+                                        {
+                                            hideLabel ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-row-container">                                        
+                                                    <span className={labelClassName}>{questionLabel}</span>
+                                                    {!hasToolTip ? (
+                                                        <div>                                                        
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                            <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        </div>
+                                                    )}                                                
+                                                </div>                                                                        
+                                            )
+                                        }
+
+                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} resize={question.properties.resize} show-counter={question.properties.show_counter}></now-textarea>
+                                    </div>                                    
+                                </li>
+                            )
+                        );
+                    }
+
+                    if (question.type == "now-radio-buttons") {
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size";
+
+                        return (
                             <li>
                                 <div className="flex-column-container">
                                     {
@@ -558,44 +989,22 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                             </div>
                                         ) : (
                                             <div className="flex-row-container">                                        
-                                                <span className={labelClassName}>{question.label}</span>
+                                                <span className={labelClassName}>{questionLabel}</span>
                                                 {!hasToolTip ? (
                                                     <div>                                                        
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                                     </div>
                                                 )}                                                
                                             </div>                                                                        
                                         )
                                     }
-                                    
-                                    <now-dropdown className="halfWidth" component-id={question.id}  id={question.id} disabled={disabled || question.readOnly} items={question.options} selected-items={question.value} select="multi" placeholder={question.properties.placeholder} icon="" variant={question.properties.variant} size={question.properties.size} tooltip-content={question.properties.tooltip} panel-fit-props={{}}></now-dropdown>
-                                </div>                                
-                            </li>
-                        );
-                    }
-
-                    if (question.type == "now-textarea") {                    
-                        return (
-                            question.has_message ? (
-                                <li>
-                                    <now-textarea className="fullWidth" component-id={question.id} id={question.id} readonly={disabled || question.readOnly} size="md" color="initial" label={question.label} value={question.value} maxlength={question.properties.maxlength} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} resize={question.properties.resize} show-counter={question.properties.show_counter} required={required}></now-textarea>
-                                </li>
-                            ) : (
-                                <li>
-                                    <now-textarea className="fullWidth" component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} size="md" color="initial" label={question.label} value={question.value} maxlength={question.properties.maxlength} resize={question.properties.resize} show-counter={question.properties.show_counter} required={required}></now-textarea>
-                                </li>
-                            )
-                        );
-                    }
-
-                    if (question.type == "now-radio-buttons") {
-                        return (
-                            <li>
-                                <now-radio-buttons component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} helper-content={question.properties.tooltip} label={question.label} layout={question.properties.layout} options={question.options} size={question.properties.size} required={required}></now-radio-buttons>
+                                                                                
+                                    <now-radio-buttons ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} layout={question.properties.layout} options={question.options} size={question.properties.size}></now-radio-buttons>
+                                </div>                                    
                             </li>
                         );
                     }     
@@ -605,7 +1014,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
 
                         return (
                             <li>
-                                <now-input-url component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} label={question.label} value={url} required={question.required}></now-input-url>                                
+                                <now-input-url ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} label={questionLabel} value={url} required={question.required}></now-input-url>                                
                             </li>
                         );
                     } 
@@ -616,11 +1025,11 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                         return (
                             question.has_message ? (
                                 <li key={question.id}>
-                                    <now-checkbox component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} checked={checkboxValue} size={question.properties.size} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} required={required} label={question.label} value={checkboxValue}></now-checkbox>
+                                    <now-checkbox ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} checked={checkboxValue} size={question.properties.size} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} required={required} label={questionLabel} value={checkboxValue}></now-checkbox>
                                 </li>
                             ) : (
                                 <li key={question.id}>
-                                    <now-checkbox component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} checked={checkboxValue} size={question.properties.size} required={required} label={question.label} value={checkboxValue}></now-checkbox>
+                                    <now-checkbox ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} checked={checkboxValue} size={question.properties.size} required={required} label={questionLabel} value={checkboxValue}></now-checkbox>
                                 </li>
                             )                            
                         );
@@ -630,7 +1039,8 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                         const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;                        
-                        
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+
                         return (
                             <div className="flex-column-container">
                                 {
@@ -639,14 +1049,14 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                         </div>
                                     ) : (
                                         <div className="flex-row-container">                                        
-                                            <span className={labelClassName}>{question.label}</span>
+                                            <span className={labelClassName}>{questionLabel}</span>
                                             {!hasToolTip ? (
                                                 <div>                                                        
                                                 </div>
                                             ) : (
                                                 <div>
-                                                    <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                    <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                    <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                    <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                                 </div>
                                             )}                                                
                                         </div>                                                                        
@@ -671,7 +1081,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                         
                         return (
                             <li key={question.id}>
-                                <now-toggle component-id={question.id} disabled={disabled || question.readOnly} label={question.label} label-position="start"  size={question.properties.size} checked={toggleValue}></now-toggle>
+                                <now-toggle ref={question.ref} component-id={question.id} disabled={disabled || question.readOnly} label={questionLabel} label-position={question.properties.labelPosition}  size={question.properties.size} checked={toggleValue}></now-toggle>
                             </li>
                         );
                     }
@@ -679,6 +1089,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                     if (question.type == "now-rich-text") {
                         const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
 
                         return (
                             <li>
@@ -689,15 +1100,15 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
                                             </div>
                                         ) : (
                                             <div className="flex-row-container">                                        
-                                                <span className="pwc-label-size">{question.label}</span>
+                                                <span className="pwc-label-size">{questionLabel}</span>
 
                                                 {!hasToolTip ? (
                                                     <div>                                                        
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={question.properties.tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
-                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" target-ref={{}} content={question.properties.tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
                                                     </div>
                                                 )}                                                
                                             </div>                                                                        
@@ -722,7 +1133,8 @@ const buildQuestionCard = ( updateState, state, question_set, disabled ) => {
 
 const generateComponents = (
     updateState,
-    state
+    state,
+    dispatch
 ) => {
 
     const {
@@ -761,34 +1173,42 @@ const generateComponents = (
     </div> */
 
     return (
-        <div>            
-            {question_sets.map(question_set => {
-                let visible = true;
+        <div className="general-flex-container">            
+            <div>
+                {buildRequiredQuestionsCard(state)}
+            </div> 
+            <div>
+                {question_sets.map(question_set => {
+                    let visible = true;
+                    let passDependency = true;
 
-                if (question_set.hasOwnProperty("visible")) {
-                    if (question_set.visible.toString() != "true") {
+                    if (question_set.hasOwnProperty("visible") && question_set.visible.toString() != "true") {
                         visible = false;
-                    }
-                }
-                
-                if (question_set.questions.length == 0 || !visible) {
-                    return (
-                        <div>
-                        </div>
-                    );
-                }
+                    }                
 
-                return (
-                    <div>
-                        {buildQuestionCard(updateState, state, question_set, disabledForm)}
-                    </div>                    
-                );
-            })}                     
+                    if (question_set.hasOwnProperty("pass_dependency") && question_set.pass_dependency.toString() != "true") {
+                        passDependency = false;
+                    }                
+                    
+                    if (question_set.questions.length == 0 || !visible || !passDependency) {
+                        return (
+                            <div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div >
+                            {buildQuestionCard(updateState, state, question_set, disabledForm, dispatch)}                      
+                        </div>        
+                    );
+                })}
+            </div>                        
         </div>
     ); 
 };
 
-export default (state, {updateState}) => {
+export default (state, {updateState, dispatch}) => {
 	const { isLoading } = state;
     
 	return (
@@ -796,7 +1216,7 @@ export default (state, {updateState}) => {
 			{isLoading ? (
 				<now-loader label="Loading..." size="lg"></now-loader>
 			) : (
-				generateComponents(updateState, state)
+				generateComponents(updateState, state, dispatch)
 			)}
 		</section>
 	);

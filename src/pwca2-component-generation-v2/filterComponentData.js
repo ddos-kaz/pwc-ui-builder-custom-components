@@ -1,4 +1,5 @@
 import populateQuestionAnswerSet from './populateQuestionAnswerSet';
+import { createRef } from '@servicenow/ui-renderer-snabbdom';
 
 let qaSet = [];
 
@@ -7,51 +8,72 @@ export default function filterComponentData ( componentData, questionAnswerSet )
     const { question_sets } = componentData;
 
     question_sets.forEach((question_set) => {
-        const { questions } = question_set;
+        const { questions, has_dependency, dependency, visible } = question_set;
+        let qsPassFiltering = true;
+            
+        if (has_dependency && !passDependency(dependency)) {
+            qsPassFiltering = false;
+        }
 
-        const filteredQuestions = questions.filter((question) => {                        
-            let passFiltering = false;
-
-            if (!question.hasOwnProperty("has_dependency") || !question.has_dependency) {
-                passFiltering = true;
-            } else {
-                passFiltering = passDependency(question.dependency);
-            }
-
-            const questionID = question.id;
-
-            const qaIndex = getIndex(questionID);
-
-            if (qaIndex != -1) {
-                if (question.type == "now-radio-buttons") {
-                    for (let index = 0; index < question.options.length; index++) {
-                        let option = question.options[index];
-                        option.checked = qaSet[qaIndex].value == option.id;
+        if (visible) {            
+            if (qsPassFiltering) {                
+                let filteredQuestions = questions.filter((question) => {                        
+                    let passFiltering = false;
+        
+                    if (!question.hasOwnProperty("has_dependency") || !question.has_dependency) {
+                        passFiltering = true;
+                    } else {
+                        passFiltering = passDependency(question.dependency);
                     }
-                } else {
-                    question.value = qaSet[qaIndex].value;      
-                }
-            } else if(question.type == "pwc-checklist") {
-                const checklist = question.properties.checklist;
+        
+                    const questionID = question.id;
+        
+                    const qaIndex = getIndex(questionID);
+        
+                    if (qaIndex != -1) {
+                        if (question.type == "now-radio-buttons") {
+                            for (let index = 0; index < question.options.length; index++) {
+                                let option = question.options[index];
+                                option.checked = qaSet[qaIndex].value == option.id;
+                            }
+                        } else {
+                            question.value = qaSet[qaIndex].value;      
+                        }
+                    } else if(question.type == "pwc-checklist") {
+                        const checklist = question.properties.checklist;
+                        
+                        for (let clIndex = 0; clIndex < checklist.length; clIndex++) {
+                            const checklistItem = checklist[clIndex];
+                            const qcIndex = getIndex(checklistItem.id);
+        
+                            if (qcIndex != -1) {
+                                question.properties.checklist[clIndex].value = qaSet[qcIndex].value;
+                            }
+                        }
+                    }                    
+                    
+                    if (!passFiltering) {
+                        qaSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {"id": question.id}, "removeID");
+                    }
+        
+                    return passFiltering;
+                });
                 
-                for (let clIndex = 0; clIndex < checklist.length; clIndex++) {
-                    const checklistItem = checklist[clIndex];
-                    const qcIndex = getIndex(checklistItem.id);
+                filteredQuestions = filteredQuestions.reduce((acc, question) => {
+                    const newQuestion = {...{"ref": createRef()}, ...question};
 
-                    if (qcIndex != -1) {
-                        question.properties.checklist[clIndex].value = qaSet[qcIndex].value;
-                    }
-                }
+                    return [ ...acc, newQuestion ];
+                }, []);
+
+                //console.log(`${question_set.name} - filteredQuestions: ${JSON.stringify(filteredQuestions, null, '\t')}`);
+
+                question_set.questions = filteredQuestions;
+                question_set.pass_dependency = true;
+            } else {
+                question_set.pass_dependency = false;
             }
-
-            if (!passFiltering) {
-                qaSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {"id": question.id}, "removeID");
-            }
-
-            return passFiltering;
-        });        
-
-        question_set.questions = filteredQuestions;
+            
+        }                
     });
 
     return componentData;

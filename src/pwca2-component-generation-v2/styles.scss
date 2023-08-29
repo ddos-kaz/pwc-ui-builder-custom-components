@@ -44,7 +44,75 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 5px;
+  //gap: 5px;
+}
+
+.pwc-pill {
+  position: relative;
+  display: flex;
+  font-variant: normal;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-indent: 0px;
+  text-shadow: none;
+  white-space: normal;
+  box-sizing: border-box;
+}
+
+.pwc-pill-button {
+  height: 32px;
+  border-radius: 16px;
+  padding-inline: 16px;
+  font-size: 16px;
+  line-height: 1.25;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  margin: 0px;
+  border-width: var(--now-pill--border-width,var(--now-form-control--border-width,1px));
+  border-style: solid;
+  border-color: RGB(var(--now-pill--border-color,var(--now-color_border--secondary,var(--now-color--neutral-5,172,180,181))));
+  padding-block: 0px;
+  font-style: var(--now-pill--font-style,var(--now-form-control--font-style,normal));
+  font-weight: var(--now-pill--font-weight,var(--now-form-control--font-weight,normal));
+  font-family: var(--now-pill--font-family,var(--now-form-control--font-family,var(--now-font-family,"Source Sans Pro",Arial,sans-serif)));
+  text-transform: var(--now-pill--text-transform,var(--now-form-control--text-transform,none));
+  color: RGB(var(--now-pill--color,var(--now-color_text--primary,var(--now-color--neutral-18,22,27,28))));
+  background-color: RGB(var(--now-pill--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255))));
+}
+
+.pwc-pill-button-label {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.required-questions-card-container {
+  display: flex;
+  flex-direction: column;  
+  padding: 0.5rem;
+  gap: 5px;  
+  max-width: 1280px;
+}
+
+.required-questions-card-title {
+  padding-left: 5px;
+}
+
+.required-questions-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.general-flex-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .pwc-state-info-text {

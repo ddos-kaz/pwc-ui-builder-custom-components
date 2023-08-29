@@ -12,14 +12,20 @@ export default function populateData(
     
 	if (idValue.hasOwnProperty("id")) {
         const index = getIndex(questionAnswerSet, idValue.id);
-        
+
         if (index == -1) {
             if (operation == "updateValue") {
                 if (idValue.type == "now-typeahead-multi") {
-                    const selectedItems = idValue.value.map((item) => item.label);                    
+                    const selectedItems = idValue.value.map((item) => item.id);                    
                     questionAnswerSet.push({
                         "id": idValue.id,
                         "value": selectedItems.join(','),
+                        "type": idValue.type
+                    });
+                } else if (idValue.type == "now-dropdown") {
+                    questionAnswerSet.push({
+                        "id": idValue.id,
+                        "value": idValue.value.join(','),
                         "type": idValue.type
                     });
                 } else {
@@ -33,10 +39,12 @@ export default function populateData(
         } else {
             if (questionAnswerSet[index].id == idValue.id) {
                 if (operation == "updateValue") {
-                    if (idValue.type == "now-typeahead-multi") {
-                        
-                        const selectedItems = idValue.value.map((item) => item.label);
+                    if (idValue.type == "now-typeahead-multi") {                        
+                        const selectedItems = idValue.value.map((item) => item.id);
                         questionAnswerSet[index].value = selectedItems.join(',');
+                    } else if (idValue.type == "now-dropdown") {
+                        console.log(`List: ${idValue.value.toString()}`);
+                        questionAnswerSet[index].value = idValue.value.join(',');
                     } else {
                         questionAnswerSet[index].value = idValue.value;
                     }
@@ -54,7 +62,7 @@ export default function populateData(
 }
 
 const transformData = (questions) => {
-    const ignoreTypes = ["now-heading", "now-rich-text", "now-input-url", "pwc-attachment", "container-base-divider"];
+    const ignoreTypes = ["now-heading", "now-rich-text",  "pwc-attachment", "container-base-divider"];
     
     return questions.reduce((set, question) => {
         if ((question.has_dependency && question.value == "") || ignoreTypes.includes(question.type)) {

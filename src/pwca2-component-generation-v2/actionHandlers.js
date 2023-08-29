@@ -42,7 +42,15 @@ import {
     GET_TABLE_API_PATH,
     TYPEAHEAD_SEARCH_REQUESTED,
     TYPEAHEAD_SEARCH_SUCCEEDED,
-    TYPEAHEAD_SEARCH_FAILED
+    TYPEAHEAD_SEARCH_FAILED,
+    NOW_TYPEAHEAD_INVALID_SET,
+    NOW_TYPEAHEAD_MULTI_INVALID_SET,
+    NOW_TYPEAHEAD_LIST_HIDDEN,
+    NOW_PILL_SELECTED_SET,
+    NOW_INPUT_INVALID_SET,
+    DELETE_FILE_ACTION,
+    NOW_INPUT_URL_VALUE_SET,
+    NOW_INPUT_URL_INVALID_SET
 } from './constants';
 
 const findIndexOfObject = (list, key, keyValue) => {
@@ -75,12 +83,13 @@ const collectAttachedFiles = questionSets => questionSets.reduce((acc, questionS
 
 const collectSearchTables = questionSets => questionSets.reduce((acc, questionSet) => {
     return questionSet.questions.reduce((acc2, question) => {
-        if(question.type == "now-typeahead" && question.properties.table != "") {
+        if((question.type == "now-typeahead" || question.type == "now-typeahead-multi") && question.properties.table != "") {
             const questionObj = {};
             questionObj[question.id] = {};
             questionObj[question.id]["type"] = question.properties.type;
             questionObj[question.id]["table"] = question.properties.table;
             questionObj[question.id]["field"] = question.properties.field || "";
+            questionObj[question.id]["options"] = [];
 
             return {...acc2, ...questionObj};
         }
@@ -114,11 +123,11 @@ const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles
 
 const collectRequiredQuestions = questionSets => questionSets.reduce((acc, questionSet) => {
     return questionSet.questions.reduce((acc2, question) => {
-        if(question.type != "now-heading" && question.type != "now-dropdown" && question.type != "now-input-url" && question.type != "pwc-checklist" && question.value != "now-rich-text" && question.value != "pwc-attachment" && ( question.required == true || question.required == "true")) {            
+        if(question.type != "now-heading" && question.type != "now-dropdown" && question.type != "now-input-url" && question.type != "pwc-checklist" && question.type != "now-rich-text" && question.type != "pwc-attachment" && ( question.required == true || question.required == "true")) {            
             return [...acc2, question.id];
         }
 
-        if (question.value == "pwc-attachment" && ( question.required == true || question.required == "true")) {
+        if (question.type == "pwc-attachment" && ( question.required == true || question.required == "true") && (question.value.hasOwnProperty("attachedFiles") && question.value.attachedFiles.length == 0)) {
             return [...acc2, question.value.recordID];
         }
 
@@ -143,30 +152,43 @@ const getRequiredQuestionsDetail = (questionSets, requiredQuestions) => question
 const updateData = (action, state, updateState, dispatch, compType) => {
         const {
             meta: {id}
-        } = action;
-        const {
-            payload: {value}
-        } = action
-                
-        const type = compType;
-        console.log(`type: ${type} - ${JSON.stringify(action, null, '\t')}`);
+        } = action;        
+
+        const { type } = action;
+        let value = "";
+
+        if (type == "NOW_INPUT#INVALID_SET" || type == "NOW_INPUT_URL#INVALID_SET") {
+            value = action.payload.fieldValue;
+        } else {
+            value = action.payload.value;            
+        }
+
+        if (compType == "now-input") {
+            const valueList = value.split('-');
+
+            if (valueList.length != 0 && valueList[0].length != 4) {
+                value = "";
+            }
+        }
+      
 
         const {questionAnswerSet, componentData, allAttachedFiles, toAddFiles} = state;
         const copyComponentData = JSON.parse(JSON.stringify(componentData));                    
         
-        const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, type}, "updateValue");
-             
+        const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, compType}, "updateValue");
         const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);
+        
         const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);        
         const filteredRequiredQuestions = filterRequiredQuestions(copyQuestionAnswerSet, allAttachedFiles, toAddFiles, requiredQuestions);                                    
         const hasRequiredQuestions = filteredRequiredQuestions.length != 0;
-        
+
         updateState({
+            referenceLabel: "",
+            referenceOptions: [],
             questionAnswerSet: copyQuestionAnswerSet,
             filteredComponentData,
             filteredRequiredQuestions,
             hasRequiredQuestions
-            //shouldRender: true
         });
         
         dispatch(STATE_UPDATE_ACTION, {
@@ -175,91 +197,111 @@ const updateData = (action, state, updateState, dispatch, compType) => {
         });
 };
 
+const searchData = (action, state, updateState, dispatch) => {
+    const payloadValue = action.payload.value;
+    const id = action.meta.id;
+    const { questionSearchTables, referenceValue } = state;
+    
+    if (questionSearchTables[id].type == "search" && referenceValue != payloadValue) {
+        updateState({
+            referenceLabel: questionSearchTables[id].field,
+            referenceValue: payloadValue,
+            searchQuestionID: id
+        });
+
+        dispatch(TYPEAHEAD_SEARCH_REQUESTED, {
+            table: questionSearchTables[id]["table"],
+            sysparm_query: `${questionSearchTables[id].field}LIKE${payloadValue}`,
+            sysparm_fields: `${questionSearchTables[id].field},sys_id`
+        });
+    }        
+};
+
 const renderView = (updateState, dispatch, properties) => {
     const { compdata, disabled } = properties;
-        console.log("Component generation started with following data: ");
-        console.log(JSON.stringify(compdata, null, '\t'));
+    console.log("Question form is generated from the following component input: ");
+    console.log(JSON.stringify(compdata, null, '\t'));
+    
+    if (compdata && compdata.status == 200 && compdata.question_sets.length != 0) {
+        const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
+        const questionSearchTables = collectSearchTables(compdata.question_sets);
         
-        if (compdata && compdata.status == 200 && compdata.question_sets.length != 0) {
-            const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
-            const questionSearchTables = collectSearchTables(compdata.question_sets);
-            console.log(`questionSearchTables: ${JSON.stringify(questionSearchTables, null, '\t')}`);
-            const dragActiveStates = {};
-            const keys = Object.keys(allAttachedFiles);
-            
-            keys.forEach((key) => {
-                dragActiveStates[key] = false;
-            });
+        const dragActiveStates = {};
+        const keys = Object.keys(allAttachedFiles);
+        
+        keys.forEach((key) => {
+            dragActiveStates[key] = false;
+        });
 
-            const questionAnswerSet = populateQuestionAnswerSet(compdata);
+        const questionAnswerSet = populateQuestionAnswerSet(compdata);
 
-            const copyCompData = JSON.parse(JSON.stringify(compdata));
-            let isTaskTable = false;
-            let isProjectTable = false;
-            let isActiveRecord = true;
-            let hasValues = false;
+        const copyCompData = JSON.parse(JSON.stringify(compdata));
+        let isTaskTable = false;
+        let isProjectTable = false;
+        let isActiveRecord = true;
+        let hasValues = false;
 
-            if (compdata.table == PWC_TASK_TABLE) {
-                isTaskTable = true;
-                isActiveRecord = compdata.active == "1";
-                hasValues = compdata.has_values;
-            } else if (compdata.table == PWC_PROJECT_TABLE) {
-                isProjectTable = true;
-                isActiveRecord = compdata.active == "1";
-                hasValues = compdata.has_values;
-            }
-
-
-            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);
-         
-            let disabledForm = !isActiveRecord;
-            let hasRequiredQuestions = false;
-            let filteredRequiredQuestions = [];
-
-            if (disabled) {
-                disabledForm = disabled;
-            } else {                
-                const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);
-                filteredRequiredQuestions = filterRequiredQuestions(questionAnswerSet, allAttachedFiles, [], requiredQuestions);
-                hasRequiredQuestions = filteredRequiredQuestions.length != 0;
-            }
-            
-            updateState({
-                componentData: compdata,                
-                isLoading: false,
-                fetchStatus: "success",                
-                hasValues: hasValues,
-                recordActive: isActiveRecord,
-                closeAlerts: false,
-                allAttachedFiles,
-                filteredComponentData,
-                disabledForm,
-                questionAnswerSet,
-                isTaskTable,
-                isProjectTable,
-                hasValues,
-                dragActiveStates,
-                filteredRequiredQuestions,
-                hasRequiredQuestions,
-                questionSearchTables
-            });
-
-            dispatch(STATE_UPDATE_ACTION, {
-                state: "loaded",
-                hasRequiredQuestions
-            });
-        } else {
-            updateState({
-                isLoading: false,
-                fetchStatus: "error",
-                errorMessage: NO_DATA,
-                closeAlerts: false
-            });
-
-            dispatch(STATE_UPDATE_ACTION, {
-                state: "error"
-            });
+        if (compdata.table == PWC_TASK_TABLE) {
+            isTaskTable = true;
+            isActiveRecord = compdata.active == "1";
+            hasValues = compdata.has_values;
+        } else if (compdata.table == PWC_PROJECT_TABLE) {
+            isProjectTable = true;
+            isActiveRecord = compdata.active == "1";
+            hasValues = compdata.has_values;
         }
+
+        
+        const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);
+        
+        let disabledForm = !isActiveRecord;
+        let hasRequiredQuestions = false;
+        let filteredRequiredQuestions = [];
+
+        if (disabled) {
+            disabledForm = disabled;
+        } else {                
+            const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);
+            filteredRequiredQuestions = filterRequiredQuestions(questionAnswerSet, allAttachedFiles, [], requiredQuestions);
+            hasRequiredQuestions = filteredRequiredQuestions.length != 0;
+        }
+        
+        updateState({
+            componentData: compdata,                
+            isLoading: false,
+            fetchStatus: "success",                
+            hasValues: hasValues,
+            recordActive: isActiveRecord,
+            closeAlerts: false,
+            allAttachedFiles,
+            filteredComponentData,
+            disabledForm,
+            questionAnswerSet,
+            isTaskTable,
+            isProjectTable,
+            hasValues,
+            dragActiveStates,
+            filteredRequiredQuestions,
+            hasRequiredQuestions,
+            questionSearchTables
+        });
+
+        dispatch(STATE_UPDATE_ACTION, {
+            state: "loaded",
+            hasRequiredQuestions
+        });
+    } else {
+        updateState({
+            isLoading: false,
+            fetchStatus: "error",
+            errorMessage: NO_DATA,
+            closeAlerts: false
+        });
+
+        dispatch(STATE_UPDATE_ACTION, {
+            state: "error"
+        });
+    }
 }
 //STATE_UPDATE_ACTION
 export default {
@@ -283,7 +325,7 @@ export default {
         };    
                 
         if (payload.name == "state" && (payload.value == "save" || payload.value == "submit")) {
-            if (hasRequiredQuestions) {
+            if (hasRequiredQuestions && payload.value == "submit") {
                 const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                
                 alertData.category = "required_fields_missing";
                 alertData.type = "complex";
@@ -315,7 +357,7 @@ export default {
                 alertData.message = "No Data is populated";
                 
                 dispatch(ALERT_ACTION, alertData);
-            } if (payload.value == "save") {
+            } if (payload.value == "save") {                
                 dispatch(SAVE_ACTION, postData);
                 dispatch(DELETE_FILES_ACTION);
                 dispatch(ADD_FILES_ACTION);
@@ -366,6 +408,20 @@ export default {
 
         updateState({
             toRemoveFiles: []
+        });
+    },
+    [DELETE_FILE_ACTION]: ({ state, dispatch, updateState }) => {
+        const { toRemoveFile } = state;
+        console.log(`Files removal for ${toRemoveFile.name} has been started.`)
+        
+        if (Object.keys(toRemoveFile).length != 0) {
+            dispatch(ATTACHMENT_DELETE_REQUESTED, {
+                "sys_id": toRemoveFile.id
+            });
+        }
+        
+        updateState({
+            toRemoveFile: {}
         });
     },
     [ADD_FILES_ACTION]: ({ state, dispatch, updateState }) => {
@@ -478,7 +534,6 @@ export default {
                 }
             }
 
-
             updateState({
                 filteredComponentData: copyFilteredComponentData,
                 removeFiles: copyRemoveFiles
@@ -549,28 +604,12 @@ export default {
     [NOW_RADIO_BUTTONS_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-radio-buttons"),
     [NOW_CHECKBOX_CHECKED_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-checkbox"),
     [NOW_TOGGLE_CHECKED_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-toggle"),
-    [NOW_INPUT_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input"),
-    [NOW_TYPEAHEAD_VALUE_SET]: ({action, state, updateState, dispatch}) => {
-        const payloadValue = action.payload.value;
-        const id = action.meta.id;
-        const { questionSearchTables } = state;
-        console.log(`questionSearchTables: ${JSON.stringify(questionSearchTables, null, '\t')}`);
-
-        //sysparm_fields: `${questionSearchTables[id].field}%2Csys_id`
-        //console.log(`${id} : ${questionSearchTables[id].type}`)
-        if (questionSearchTables[id].type == "search") {       
-            updateState({
-                referenceLabel: questionSearchTables[id].field,
-                referenceOptions: []
-            });
-
-            dispatch(TYPEAHEAD_SEARCH_REQUESTED, {
-                table: questionSearchTables[id]["table"],
-                sysparm_query: `${questionSearchTables[id].field}LIKE${payloadValue}`,
-                sysparm_fields: `${questionSearchTables[id].field},sys_id`
-            });
-        }        
-    },
+    [NOW_INPUT_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input"),    
+    [NOW_INPUT_INVALID_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input"),
+    [NOW_INPUT_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),    
+    [NOW_INPUT_INVALID_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),
+    [NOW_TYPEAHEAD_VALUE_SET]: ({action, state, updateState, dispatch}) => searchData(action, state, updateState, dispatch),
+    [NOW_TYPEAHEAD_MULTI_VALUE_SET]:  ({action, state, updateState, dispatch}) => searchData(action, state, updateState, dispatch),
     [TYPEAHEAD_SEARCH_REQUESTED]: createHttpEffect(`${GET_TABLE_API_PATH}`, {
         pathParams: ["table"],   
         headers: {
@@ -581,9 +620,8 @@ export default {
         successActionType: TYPEAHEAD_SEARCH_SUCCEEDED,
         errorActionType: TYPEAHEAD_SEARCH_FAILED,
     }),
-    [TYPEAHEAD_SEARCH_SUCCEEDED]: ({ action, state, updateState }) => {
-        console.log(`Search Succeded: ${JSON.stringify(action, null, '\t')}`);
-        const { referenceLabel } = state;          
+    [TYPEAHEAD_SEARCH_SUCCEEDED]: ({ action, state, updateState }) => {        
+        const { referenceLabel, questionSearchTables, searchQuestionID } = state;          
         const result = action.payload.result;
 
         const options = result.map((option) => {
@@ -593,18 +631,40 @@ export default {
             };
         });
 
+        const copyQuestionSearchTables = {...questionSearchTables};
+        
+        copyQuestionSearchTables[searchQuestionID].options = options;
+
+        console.log(`Search Succeeded with following options: ${JSON.stringify(options, null, '\t')}`);
+
         updateState({
-            referenceOptions: options
+            referenceOptions: options,            
+            questionSearchTables: copyQuestionSearchTables
         });
     },
     [TYPEAHEAD_SEARCH_FAILED]: ({ action }) => {
         console.log(`Search Failed: ${JSON.stringify(action, null, '\t')}`);
         updateState({
             referenceLabel: "",
+            referenceValue: "",
             referenceOptions: []
         });
     },
     [NOW_TYPEAHEAD_SELECTED_ITEM_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-typeahead"),    
     //[NOW_TYPEAHEAD_MULTI_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-typeahead-multi"),
-    [NOW_TYPEAHEAD_MULTI_SELECTED_ITEMS_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-typeahead-multi")
+    [NOW_TYPEAHEAD_MULTI_SELECTED_ITEMS_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-typeahead-multi"),
+    [NOW_TYPEAHEAD_INVALID_SET]: ({ updateState }) => {
+        updateState({
+            referenceLabel: "",
+            referenceValue: "",
+            referenceOptions: []
+        });
+    },
+    [NOW_TYPEAHEAD_MULTI_INVALID_SET]: ({ updateState }) => {
+        updateState({
+            referenceLabel: "",
+            referenceValue: "",
+            referenceOptions: []
+        });
+    }
 };
