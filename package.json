@@ -15,10 +15,10 @@
 	},
 	"module": "src/index.js",
 	"presets": [
-        "@babel/preset-env",
-        "@babel/preset-react",
-        "@babel/preset-typescript"
-    ],
+		"@babel/preset-env",
+		"@babel/preset-react",
+		"@babel/preset-typescript"
+	],
 	"dependencies": {
 		"@servicenow/cli-archetype": "22.0.0",
 		"@servicenow/cli-component-archetype": "22.0.0",

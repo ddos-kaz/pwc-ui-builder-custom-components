@@ -21,7 +21,7 @@
     }
 
     now-card {
-        margin-bottom: 20px;
+        margin-bottom: 5px;
     }
 }
 
@@ -38,6 +38,23 @@
   flex-direction: row;
   gap: 5px;
   align-items: center;
+}
+
+.now-heading-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.checklist-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 13px;
+  margin-top: 13px;
+  //gap: 5px;
 }
 
 .flex-column-container {
@@ -57,6 +74,20 @@
   text-shadow: none;
   white-space: normal;
   box-sizing: border-box;
+}
+
+.read-only-qs-container {
+  gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
+  width: 100%;
+}
+
+.li-read-only-qs-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .pwc-pill-button {
@@ -115,6 +146,12 @@
   gap: 15px;
 }
 
+.attachment-flex-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .pwc-state-info-text {
     display: flex;
     align-items: center;
@@ -154,7 +191,7 @@
   padding: 0 5px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
   margin-top: 5px;
 }
 
@@ -208,6 +245,9 @@
 .file-upload-form {
   padding: 5px;
   min-width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .input-file-upload {
@@ -242,7 +282,7 @@
 .file-upload-section {
   display: flex;
   flex-direction: column;    
-  min-height: 30vh;
+  //min-height: 30vh;
   width: 60%;
   gap: 2px;
 }
@@ -257,6 +297,15 @@
   gap: 10px;
   padding: 0.5rem;
   background-color: #fff;
+}
+
+.line-container {
+  width: 98%;
+  justify-content: flex-start;
+}
+
+.line-container-end {
+  margin-bottom: 5px;
 }
 
 .pwc-card-divider {

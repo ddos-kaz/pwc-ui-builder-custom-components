@@ -67,13 +67,15 @@ const findIndexOfObject = (list, key, keyValue) => {
 const collectAttachedFiles = questionSets => questionSets.reduce((acc, questionSet) => {
     return questionSet.questions.reduce((acc2, question) => {
         if(question.type == "pwc-attachment" && question.value != "") {
-            var key = question.value.recordID;
-            var keyValue = question.value.attachedFiles;
+            const attachedFiles = question.value.attachedFiles.map((file) => {
+                return {
+                    ...file,
+                    "recordID": question.value.recordID,
+                    "questionID": question.id
+                }
+            });
             
-            const attachedFiles = {};
-            attachedFiles[key] = keyValue;
-
-            return {...acc2, ...attachedFiles};
+            return [...acc2, ...attachedFiles];
         }
 
         return acc2;
@@ -106,9 +108,9 @@ const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles
         return  questionAnswerValue == "";    
     }
 
-    var keys = Object.keys(allAttachedFiles);
+    const qIndex = findIndexOfObject(allAttachedFiles, "questionID", id);
 
-    if (keys.includes(id) && allAttachedFiles[id].length != 0) {        
+    if (qIndex != -1 && requiredQuestions[qIndex].attachedFiles.length != 0) {
         return false;
     }
 
@@ -122,13 +124,18 @@ const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles
 });
 
 const collectRequiredQuestions = questionSets => questionSets.reduce((acc, questionSet) => {
+    if (questionSet.readOnly == true || questionSet.readOnly == "true" || questionSet.visible == false || questionSet.visible == "false") {
+        return acc;
+    }
+
+
     return questionSet.questions.reduce((acc2, question) => {
         if(question.type != "now-heading" && question.type != "now-dropdown" && question.type != "now-input-url" && question.type != "pwc-checklist" && question.type != "now-rich-text" && question.type != "pwc-attachment" && ( question.required == true || question.required == "true")) {            
             return [...acc2, question.id];
         }
 
         if (question.type == "pwc-attachment" && ( question.required == true || question.required == "true") && (question.value.hasOwnProperty("attachedFiles") && question.value.attachedFiles.length == 0)) {
-            return [...acc2, question.value.recordID];
+            return [...acc2, question.id];
         }
 
         return acc2;
@@ -155,29 +162,41 @@ const updateData = (action, state, updateState, dispatch, compType) => {
         } = action;        
 
         const { type } = action;
-        let value = "";
+        let value = "";        
+        
 
         if (type == "NOW_INPUT#INVALID_SET" || type == "NOW_INPUT_URL#INVALID_SET") {
             value = action.payload.fieldValue;
+        } else if (type == "NOW_DROPDOWN#SELECTED_ITEMS_SET") {
+            let list = action.payload.value.toString();
+            list = list.split(",");
+
+            for (let index = 0; index < list.length; index++) {
+                if (list[index] != "") {
+                    if (index + 1 == list.length) {
+                        value += list[index];
+                    } else {
+                        value += list[index] + ",";
+                    }
+                    
+                }                
+            }
         } else {
             value = action.payload.value;            
         }
-
-        if (compType == "now-input") {
+    
+        /* if (compType == "now-input") {
             const valueList = value.split('-');
 
             if (valueList.length != 0 && valueList[0].length != 4) {
                 value = "";
             }
-        }
+        } */
       
-
-        const {questionAnswerSet, componentData, allAttachedFiles, toAddFiles} = state;
+        const { questionAnswerSet, componentData, allAttachedFiles, toAddFiles } = state;
         const copyComponentData = JSON.parse(JSON.stringify(componentData));                    
-        
-        const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, compType}, "updateValue");
-        const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);
-        
+        const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, type: compType}, "updateValue");
+        const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);        
         const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);        
         const filteredRequiredQuestions = filterRequiredQuestions(copyQuestionAnswerSet, allAttachedFiles, toAddFiles, requiredQuestions);                                    
         const hasRequiredQuestions = filteredRequiredQuestions.length != 0;
@@ -218,23 +237,23 @@ const searchData = (action, state, updateState, dispatch) => {
 };
 
 const renderView = (updateState, dispatch, properties) => {
-    const { compdata, disabled } = properties;
+    const { compdata, disabled, timestamp } = properties;
     console.log("Question form is generated from the following component input: ");
     console.log(JSON.stringify(compdata, null, '\t'));
     
     if (compdata && compdata.status == 200 && compdata.question_sets.length != 0) {
         const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
         const questionSearchTables = collectSearchTables(compdata.question_sets);
-        
-        const dragActiveStates = {};
-        const keys = Object.keys(allAttachedFiles);
-        
-        keys.forEach((key) => {
-            dragActiveStates[key] = false;
-        });
+
+        const dragActiveStates = allAttachedFiles.reduce((acc, attachedFile) => {
+            const dragActiveState = {};
+            dragActiveState[attachedFile.recordID] = false;
+
+            return {...acc, ...dragActiveState}
+        }, {});
 
         const questionAnswerSet = populateQuestionAnswerSet(compdata);
-
+        console.log(`questionAnswerSet" ${JSON.stringify(questionAnswerSet, null, '\t')}`);
         const copyCompData = JSON.parse(JSON.stringify(compdata));
         let isTaskTable = false;
         let isProjectTable = false;
@@ -266,6 +285,7 @@ const renderView = (updateState, dispatch, properties) => {
             hasRequiredQuestions = filteredRequiredQuestions.length != 0;
         }
         
+        
         updateState({
             componentData: compdata,                
             isLoading: false,
@@ -283,7 +303,8 @@ const renderView = (updateState, dispatch, properties) => {
             dragActiveStates,
             filteredRequiredQuestions,
             hasRequiredQuestions,
-            questionSearchTables
+            questionSearchTables,
+            timestamp
         });
 
         dispatch(STATE_UPDATE_ACTION, {
@@ -310,7 +331,8 @@ export default {
     [actionTypes.COMPONENT_PROPERTY_CHANGED]: ({
 		action,
         state,
-        dispatch
+        dispatch,
+        updateState
 	}) => {
         const payload= action.payload;
         
@@ -366,6 +388,10 @@ export default {
                 dispatch(DELETE_FILES_ACTION);
                 dispatch(ADD_FILES_ACTION);
             }
+        } else if (payload.name == "timestamp") {
+            updateState({
+                timestamp: payload.value
+            });
         }
     },
     [NOW_BUTTON_CLICKED]: ({ dispatch, updateState, state, action }) => {
@@ -606,8 +632,8 @@ export default {
     [NOW_TOGGLE_CHECKED_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-toggle"),
     [NOW_INPUT_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input"),    
     [NOW_INPUT_INVALID_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input"),
-    [NOW_INPUT_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),    
-    [NOW_INPUT_INVALID_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),
+    [NOW_INPUT_URL_VALUE_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),    
+    [NOW_INPUT_URL_INVALID_SET]: ({action, state, updateState, dispatch}) => updateData(action, state, updateState, dispatch, "now-input-url"),
     [NOW_TYPEAHEAD_VALUE_SET]: ({action, state, updateState, dispatch}) => searchData(action, state, updateState, dispatch),
     [NOW_TYPEAHEAD_MULTI_VALUE_SET]:  ({action, state, updateState, dispatch}) => searchData(action, state, updateState, dispatch),
     [TYPEAHEAD_SEARCH_REQUESTED]: createHttpEffect(`${GET_TABLE_API_PATH}`, {
@@ -635,7 +661,7 @@ export default {
         
         copyQuestionSearchTables[searchQuestionID].options = options;
 
-        console.log(`Search Succeeded with following options: ${JSON.stringify(options, null, '\t')}`);
+        //console.log(`Search Succeeded with following options: ${JSON.stringify(options, null, '\t')}`);
 
         updateState({
             referenceOptions: options,            
@@ -643,7 +669,8 @@ export default {
         });
     },
     [TYPEAHEAD_SEARCH_FAILED]: ({ action }) => {
-        console.log(`Search Failed: ${JSON.stringify(action, null, '\t')}`);
+        //console.log(`Search Failed: ${JSON.stringify(action, null, '\t')}`);
+        
         updateState({
             referenceLabel: "",
             referenceValue: "",

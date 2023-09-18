@@ -246,6 +246,60 @@
 					"fieldType": "string",
 					"required": true,
 					"defaultValue": ""
+				},
+				{
+					"name": "timestamp",
+					"label": "Timestamp",
+					"description": "Timestamp",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name": "position",
+					"label": "Position",
+					"description": "Position of the required questions card",
+					"valueType":"string",
+					"readOnly": false,
+					"fieldType": "choice",
+					"typeMetadata":{
+						"choices":[
+							{
+								"label":"Top",
+								"value":"top"
+							},
+							{
+								"label":"Bottom",
+								"value":"bottom"
+							}
+						],
+						"schema":{
+							"type":"string",
+							"enum":[
+								"top",
+								"bottom"
+							]
+						}
+					},
+					"mandatory": true,
+					"defaultValue": "top"
+				},
+				{
+					"name":"datasheet",
+					"label":"Data Sheet",
+					"fieldType":"boolean",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"boolean"
+					   }
+					},
+					"defaultValue":false,
+					"description": "Display data in the data sheet format",
+					"selectable":false,
+					"valueType":"string",
+					"mandatory":false
 				}
 			]
 	    },

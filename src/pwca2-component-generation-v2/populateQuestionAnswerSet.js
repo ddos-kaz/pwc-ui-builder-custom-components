@@ -10,19 +10,20 @@ export default function populateData(
         return question_sets.reduce((set, {questions}) => set.concat(transformData(questions)), []);
     }    
     
+
 	if (idValue.hasOwnProperty("id")) {
         const index = getIndex(questionAnswerSet, idValue.id);
 
         if (index == -1) {
             if (operation == "updateValue") {
-                if (idValue.type == "now-typeahead-multi") {
-                    const selectedItems = idValue.value.map((item) => item.id);                    
+                if (idValue.type == "now-typeahead-multi" || idValue.type == "now-typeahead-multi-choice") {
+                    //const selectedItems = idValue.value.map((item) => item.id);   
                     questionAnswerSet.push({
                         "id": idValue.id,
-                        "value": selectedItems.join(','),
+                        "value": [...idValue.value, ...questionAnswerSet[index].value], //selectedItems.join(','),
                         "type": idValue.type
                     });
-                } else if (idValue.type == "now-dropdown") {
+                } else if (idValue.type == "now-dropdown" || idValue.type == "now-select") {
                     questionAnswerSet.push({
                         "id": idValue.id,
                         "value": idValue.value.join(','),
@@ -39,11 +40,12 @@ export default function populateData(
         } else {
             if (questionAnswerSet[index].id == idValue.id) {
                 if (operation == "updateValue") {
-                    if (idValue.type == "now-typeahead-multi") {                        
-                        const selectedItems = idValue.value.map((item) => item.id);
-                        questionAnswerSet[index].value = selectedItems.join(',');
-                    } else if (idValue.type == "now-dropdown") {
-                        console.log(`List: ${idValue.value.toString()}`);
+                    questionAnswerSet[index].type = idValue.type;
+                    if (idValue.type == "now-typeahead-multi" || idValue.type == "now-typeahead-multi-choice") {                        
+                        //const selectedItems = idValue.value.map((item) => item.id);
+                        console.log(`${idValue.type} --- ${JSON.stringify([...idValue.value, ...questionAnswerSet[index].value])}`);
+                        questionAnswerSet[index].value = [...idValue.value, ...questionAnswerSet[index].value]; //selectedItems.join(',');                        
+                    } else if (idValue.type == "now-dropdown" || idValue.type == "now-select") {
                         questionAnswerSet[index].value = idValue.value.join(',');
                     } else {
                         questionAnswerSet[index].value = idValue.value;
