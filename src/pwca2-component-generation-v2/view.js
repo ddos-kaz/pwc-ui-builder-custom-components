@@ -21,7 +21,10 @@ import '@servicenow/now-tooltip';
 import '@servicenow/now-pill';
 //import '@servicenow/now-modal';
 
-import { ATTACHMENT_URL } from "./constants";
+import { 
+    ATTACHMENT_URL,
+    STATE_UPDATE_ACTION 
+} from "./constants";
 
 const generateUUID = (format) => format.replace(/[xy]/g, (c) => {
     let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -190,7 +193,7 @@ const fileElementsList = (files, isNew, recordID, id, state, updateState, disabl
 };
 
 
-const dragDropFileForm = (updateState, state, attachmentConfig, id, disabled, readOnly, dispatch) => {
+const dragDropFileForm = (updateState, state, attachmentConfig, id, ref, disabled, readOnly, dispatch) => {
     const { recordID, tableName, maxFileSize, allowedFileTypes } = attachmentConfig;
     const allowedFileTypesArr = allowedFileTypes.split(',');
 
@@ -279,14 +282,14 @@ const dragDropFileForm = (updateState, state, attachmentConfig, id, disabled, re
             hasRequiredQuestions: copyFilteredRequiredQuestions.length != 0
         });
 
-        dispatch({
+        dispatch(STATE_UPDATE_ACTION, {
             state: "updated",
             hasRequiredQuestions: copyFilteredRequiredQuestions.length != 0
         });
     };
 
     const filteredToAddFiles = toAddFiles.filter(file => file.recordID == recordID);
-    
+    //ref={ref} id={id}    
     return (
         <form className="file-upload-form" ondragenter={handleDrag} onsubmit={(e) => e.preventDefault()}>
             {(!disabled && !readOnly) ? (
@@ -341,7 +344,12 @@ const dragDropFileForm = (updateState, state, attachmentConfig, id, disabled, re
 
 const buildRequiredQuestionPill = (question) => {
     const focusTextInput = () => {    
-        question.ref.current.focus();
+        //console.log(`${question.label} - ${question.ref}`);
+        if (question.type == "pwc-attachment") {
+            question.ref.current[0].focus();
+        } else {
+            question.ref.current.focus();
+        }        
     };
     //<input type="button" value={question.label} />
     return (
@@ -418,6 +426,7 @@ const getOptionLabel = (options, id) => {
     return "";
 };
 
+
 const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch ) => {
     const { questions, readOnly, name } = question_set;
     
@@ -442,6 +451,17 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
 
     const questionsLength = questions.length;
     let questionIndex = 0;
+    
+    if (readOnly || datasheet) {
+        const filteredQuestions = questions.filter(question => question.type != "now-heading" && question.type != "container-base-divider" && question.type != "now-rich-text");
+        
+        if (filteredQuestions.length == 0) {
+            return (
+                <div></div>
+            );
+        }
+    }
+    
 
     return (
         <now-card size="md" interaction="none" hide-shadow={true} className="pwc-now-card">                        
@@ -452,7 +472,9 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                     if (readOnly || datasheet) {
                         let questionValue = "";
 
-                        if ((question.type == "now-typeahead-multi" || question.type == "now-typeahead") && question.value != "") {
+                        if ((question.type == "now-typeahead-multi-choice" || question.type == "now-typeahead-multi" || question.type == "now-typeahead") && question.value != "") {
+                            questionValue = question.properties.placeholder;
+                        } else if (question.type == "pwc-checklist" && question.properties.hasOwnProperty("placeholder") && question.properties.placeholder != "") {
                             questionValue = question.properties.placeholder;
                         } else if (question.type == "now-dropdown" || question.type == "now-typeahead-multi-choice" || question.type == "now-dropdown:multi" || question.type == "now-dropdown:multi" || question.type == "now-radio-buttons" || question.type == "now-select") {
                             let questionValueList = [];
@@ -470,9 +492,9 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                 questionLabelList.push(getOptionLabel(question.options, questionValueList[index]));
                             }
 
-                            questionValue = questionLabelList.join(',');
-                        } else if (question.type == "now-input-url") {
-                            questionValue = question.properties.url || question.value;
+                            questionValue = questionLabelList.join(', ');
+                        } else if (question.type == "now-input-url" && question.value != "" && question.value != null && question.properties.url != "" && question.properties.url != null) {
+                            questionValue = question.value || question.properties.url;
 
                             return (
                                 <li className="li-read-only-qs-container">
@@ -481,26 +503,21 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             {question.label}
                                         </div>
                                         <div>
-                                            <a href={questionValue} target="_blank">
+                                            <a href={questionValue} className="link-data-sheet" target="_blank">
                                                 {questionValue}
                                             </a>
                                         </div>                                        
                                     </div>
-                                    { (questionIndex == questionsLength) ? (
-                                        <div className="line-container-end"></div>
-                                    ) :(
-                                        <div className="line-container">
-                                            <now-card-divider full-width={true} padding="lg"></now-card-divider>
-                                        </div>
-                                    )}                                                                           
+                                    <div className="line-container">
+                                        <now-card-divider full-width={true} padding="lg"></now-card-divider>
+                                    </div>                                                                       
                                 </li>
                             );
                         } else if (question.type == "now-checkbox" && question.value != "") {
                             questionValue = (question.value == "true" || question.value == true) ? "true" : "false";
                         }  else if (question.type == "now-toggle" && question.value != "") {
                             questionValue = (question.value == "true" || question.value == true) ? "true" : "false";
-                        } else if (question.type == "pwc-attachment") {
-
+                        } else if (question.type == "pwc-attachment" && question.value.hasOwnProperty("attachedFiles") && question.value.attachedFiles.length != 0) {
                             return (
                                 <li className="li-read-only-qs-container">
                                     <div className="read-only-qs-container">
@@ -510,18 +527,22 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                         <div className="attachment-flex-container">
                                             {question.value.attachedFiles.map((file) => {
                                                 return (
-                                                    <a href={`/sys_attachment.do?sys_id=${file.id}`} target="_blank">{file.name}</a>
+                                                    <a href={`/sys_attachment.do?sys_id=${file.id}`} className="link-data-sheet" target="_blank">{file.name}</a>
                                                 );                                                
                                             })}
-                                        </div>
-                                    </div>
+                                        </div>                                        
+                                    </div>                                    
+                                    <div className="line-container">
+                                        <now-card-divider full-width={true} padding="lg"></now-card-divider>
+                                    </div> 
                                 </li>
                             );
-                        } else {
+                        } else if (question.type != "pwc-attachment") {
                             questionValue = question.value;
                         }
 
-                        if (question.type == "now-heading" || question.type == "container-base-divider" || question.type == "now-rich-text" || question.type == "pwc-attachment") {
+
+                        if (question.type == "now-heading" || question.type == "container-base-divider" || question.type == "now-rich-text" || questionValue == "" || questionValue == null) {
                             return (
                                 <div></div>
                             );
@@ -536,13 +557,9 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             {questionValue}
                                         </div>
                                     </div>
-                                    { (questionIndex == questionsLength) ? (
-                                        <div className="line-container-end"></div>
-                                    ) :(
-                                        <div className="line-container">
-                                            <now-card-divider full-width={true} padding="lg"></now-card-divider>
-                                        </div>
-                                    )}                                                                           
+                                    <div className="line-container">
+                                        <now-card-divider full-width={true} padding="lg"></now-card-divider>
+                                    </div>                                                                       
                                 </li>
                             );
                         }
@@ -574,10 +591,10 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                         let { allowedFileTypes } = question.value;
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
                         const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
-                        allowedFileTypes = allowedFileTypes.toUpperCase().split(',');
-
+                        allowedFileTypes = allowedFileTypes.toUpperCase().split(',');                                                                        
+                        //<now-dropdown ref={question.ref}  component-id={question.id}  id={question.id} disabled={true} items={[]} selected-items={''} select="single" placeholder={''} icon="" panel-fit-props={{}}></now-dropdown>
                         return (
-                            <li ref={question.ref}>
+                            <li>                                
                                 <div className="file-upload-section">
                                     <div className="flex-row-container">
                                         <span className="pwc-label-size"><b>{questionLabel}</b></span>
@@ -592,8 +609,11 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             </div>
                                         )} 
                                     </div>
-                                    {required && !disabled ? (
-                                        <span className="redTextColor">File attachment is required</span>
+                                    {required && !disabled ? (                                        
+                                        <div className="mandatory-file-label-container">
+                                            <now-button-stateful ref={question.ref} id={question.id} icon="asterisk-fill" variant="primary" size="sm" config-aria={{}}></now-button-stateful>
+                                            <span className="redTextColor">File attachment is required</span>
+                                        </div>                                        
                                     ) : (
                                         <span></span>
                                     )}
@@ -603,8 +623,10 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                     ) : (
                                         <span></span>
                                     )}
-                                                                        
-                                    {dragDropFileForm(updateState, state, question.value, question.id, disabled, question.readOnly, dispatch)}                                                                   
+
+                                    <div>
+                                        {dragDropFileForm(updateState, state, question.value, question.id, question.ref, disabled, question.readOnly, dispatch)}
+                                    </div>                                                             
                                 </div>
                             </li>
                         );
@@ -816,7 +838,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="contains" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
                                     </div>                                    
                                 </li>
                             ) : (
@@ -842,7 +864,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="managed" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
+                                        <now-typeahead ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={typeaheadQuestionValue} search="contains" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead>
                                     </div>                                    
                                 </li>
                             )
@@ -872,6 +894,8 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
                         const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        const placeholder = question.value != "" && question.value.length != 0 ? "" : question.properties.placeholder;
+
                         return (                            
                             question.has_message ? (
                                 <li>
@@ -896,7 +920,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi> 
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} placeholder={placeholder} config-aria={{}}></now-typeahead-multi> 
                                     </div>                                
                                 </li>
                             ) : (
@@ -922,7 +946,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi>
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
                                     </div>                                     
                                 </li>
                             )
@@ -950,6 +974,8 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
                         const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
                         const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        const placeholder = question.value != "" && question.value.length != 0 ? "" : question.properties.placeholder;
+                        
                         return (                            
                             question.has_message ? (
                                 <li>
@@ -974,7 +1000,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi> 
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  config-aria={{}}></now-typeahead-multi> 
                                     </div>                                
                                 </li>
                             ) : (
@@ -1000,7 +1026,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-item={[question.value]} search="managed" helper-content={question.tooltip} label={""} placeholder={question.properties.placeholder} config-aria={{}}></now-typeahead-multi>
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
                                     </div>                                     
                                 </li>
                             )
@@ -1137,9 +1163,20 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size";
                         
                         return (
-                            question.has_message ? (
+                            (question.has_message) ? (
                                 <li>
                                     <div className="flex-column-container">
+                                        {
+                                            (question.pass_validation || !question.hasOwnProperty("validation_msg")) ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="validation-box">
+                                                    {question.validation_msg}
+                                                </div>    
+                                            )
+                                        }
+
                                         {
                                             hideLabel ? (
                                                 <div>
@@ -1166,6 +1203,17 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                             ) : (
                                 <li>
                                     <div className="flex-column-container">
+                                        {
+                                            (question.pass_validation || !question.hasOwnProperty("validation_msg")) ? (
+                                                <div>
+                                                </div>
+                                            ) : (
+                                                <div className="validation-box">
+                                                    {question.validation_msg}
+                                                </div>    
+                                            )
+                                        }
+
                                         {
                                             hideLabel ? (
                                                 <div>
@@ -1229,11 +1277,47 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                     }     
                     
                     if (question.type == "now-input-url") {
-                        const url = question.value != "" ? question.value : question.properties.url;
-
+                        const hasToolTip = question.properties.hasOwnProperty("tooltip") ? question.properties.tooltip != "" : false;
+                        const tooltip = question.properties.hasOwnProperty("tooltip") ? (question.properties.tooltip + "") : "";
+                        const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
+                        const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size";
+                        const url = question.value == null ? "" : (question.value != "" ? question.value : question.properties.url);
+                        
                         return (
                             <li>
-                                <now-input-url ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} label={questionLabel} value={url} required={question.required}></now-input-url>                                
+                                <div className="flex-column-container">
+                                    {
+                                        (question.pass_validation || !question.hasOwnProperty("validation_msg")) ? (
+                                            <div>
+                                            </div>
+                                        ) : (
+                                            <div className="validation-box">
+                                                {question.validation_msg}
+                                            </div>    
+                                        )
+                                    }
+                                    {
+                                        hideLabel ? (
+                                            <div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex-row-container">                                        
+                                                <span className={labelClassName}>{questionLabel}</span>
+                                                {!hasToolTip ? (
+                                                    <div>                                                        
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <now-button-iconic icon="circle-info-outline" variant="tertiary" bare={true} size="sm" config-aria={{"button":{"aria-label":""}}} tooltip-content={tooltip} aria-describedby={`${question.id}-tooltip`}></now-button-iconic>
+                                                        <now-tooltip id={`${question.id}-tooltip`} aria-label={question.properties.tooltip} aria-hidden="true" role="tooltip" content={tooltip} delay={300} container={{}} position={["top-center bottom-center","bottom-center top-center","center-end center-start","center-start center-end","top-end top-start","bottom-end bottom-start","top-start top-end","bottom-start bottom-end"]} offset={8}></now-tooltip>
+                                                    </div>
+                                                )}                                                
+                                            </div>                                                                        
+                                        )
+                                    }
+                                                                                
+                                    <now-input-url className="max-width-95" ref={question.ref} component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} value={url}></now-input-url>
+                                </div>                                    
                             </li>
                         );
                     } 
@@ -1406,7 +1490,8 @@ const generateComponents = (
         errorMessage,
         properties: {
             position
-        }
+        },
+        toSaveForm
     } = state;
 
     if (fetchStatus == "error") {
@@ -1426,6 +1511,14 @@ const generateComponents = (
 
     return (
         <div>
+            {toSaveForm ? (
+                <div className="save-form-container">                    
+                    <now-icon icon="save-outline" size="md" spin={true}></now-icon>
+                    <p>Saving...</p>
+                </div>
+            ) : (
+                <div></div>
+            )}            
             {position == "top" ? (
                 <div className="general-flex-container">            
                     <div>
@@ -1453,7 +1546,7 @@ export default (state, {updateState, dispatch}) => {
 	const { isLoading } = state;
     
 	return (
-		<section className="comp-gen">
+		<section className="comp-gen">            
 			{isLoading ? (
 				<now-loader label="Loading..." size="lg"></now-loader>
 			) : (

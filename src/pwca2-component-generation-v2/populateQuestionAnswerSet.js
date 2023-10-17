@@ -20,13 +20,13 @@ export default function populateData(
                     //const selectedItems = idValue.value.map((item) => item.id);   
                     questionAnswerSet.push({
                         "id": idValue.id,
-                        "value": [...idValue.value, ...questionAnswerSet[index].value], //selectedItems.join(','),
+                        "value": idValue.value, //[...idValue.value, ...questionAnswerSet[index].value], //selectedItems.join(','),
                         "type": idValue.type
                     });
                 } else if (idValue.type == "now-dropdown" || idValue.type == "now-select") {
                     questionAnswerSet.push({
                         "id": idValue.id,
-                        "value": idValue.value.join(','),
+                        "value": idValue.value,
                         "type": idValue.type
                     });
                 } else {
@@ -42,11 +42,10 @@ export default function populateData(
                 if (operation == "updateValue") {
                     questionAnswerSet[index].type = idValue.type;
                     if (idValue.type == "now-typeahead-multi" || idValue.type == "now-typeahead-multi-choice") {                        
-                        //const selectedItems = idValue.value.map((item) => item.id);
-                        console.log(`${idValue.type} --- ${JSON.stringify([...idValue.value, ...questionAnswerSet[index].value])}`);
-                        questionAnswerSet[index].value = [...idValue.value, ...questionAnswerSet[index].value]; //selectedItems.join(',');                        
+                        //const selectedItems = idValue.value.map((item) => item.id);                        
+                        questionAnswerSet[index].value = idValue.value; //[...idValue.value, ...questionAnswerSet[index].value]; //selectedItems.join(',');                        
                     } else if (idValue.type == "now-dropdown" || idValue.type == "now-select") {
-                        questionAnswerSet[index].value = idValue.value.join(',');
+                        questionAnswerSet[index].value = idValue.value;
                     } else {
                         questionAnswerSet[index].value = idValue.value;
                     }

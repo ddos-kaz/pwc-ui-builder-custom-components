@@ -91,6 +91,7 @@ const collectSearchTables = questionSets => questionSets.reduce((acc, questionSe
             questionObj[question.id]["type"] = question.properties.type;
             questionObj[question.id]["table"] = question.properties.table;
             questionObj[question.id]["field"] = question.properties.field || "";
+            questionObj[question.id]["subfield"] = question.properties.subfield || "";
             questionObj[question.id]["options"] = [];
 
             return {...acc2, ...questionObj};
@@ -98,14 +99,14 @@ const collectSearchTables = questionSets => questionSets.reduce((acc, questionSe
 
         return acc2;
     }, acc);
-}, []);
+}, {});
 
 const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles, requiredQuestions) => requiredQuestions.filter((id) => {
     const qaIndex = findIndexOfObject(questionAnswerSet, "id", id);    
 
     if (qaIndex != -1) {
         const questionAnswerValue = questionAnswerSet[qaIndex]["value"];
-        return  questionAnswerValue == "";    
+        return  questionAnswerValue == "" || questionAnswerValue == null;    
     }
 
     const qIndex = findIndexOfObject(allAttachedFiles, "questionID", id);
@@ -114,7 +115,7 @@ const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles
         return false;
     }
 
-    const fileIndex = findIndexOfObject(toAddFiles, "recordID", id);
+    const fileIndex = findIndexOfObject(toAddFiles, "questionID", id);
 
     if (fileIndex != -1) {
         return false;
@@ -124,17 +125,32 @@ const filterRequiredQuestions = (questionAnswerSet, allAttachedFiles, toAddFiles
 });
 
 const collectRequiredQuestions = questionSets => questionSets.reduce((acc, questionSet) => {
-    if (questionSet.readOnly == true || questionSet.readOnly == "true" || questionSet.visible == false || questionSet.visible == "false") {
+    if (questionSet.readOnly == true || !questionSet.pass_dependency || questionSet.readOnly == "true" || questionSet.visible == false || questionSet.visible == "false") {
         return acc;
     }
 
 
     return questionSet.questions.reduce((acc2, question) => {
-        if(question.type != "now-heading" && question.type != "now-dropdown" && question.type != "now-input-url" && question.type != "pwc-checklist" && question.type != "now-rich-text" && question.type != "pwc-attachment" && ( question.required == true || question.required == "true")) {            
+        if(question.type != "now-heading" && question.type != "now-dropdown" && question.type != "pwc-checklist" && question.type != "now-rich-text" && question.type != "pwc-attachment" && ( question.required == true || question.required == "true")) {            
             return [...acc2, question.id];
         }
 
         if (question.type == "pwc-attachment" && ( question.required == true || question.required == "true") && (question.value.hasOwnProperty("attachedFiles") && question.value.attachedFiles.length == 0)) {
+            return [...acc2, question.id];
+        }
+
+        return acc2;
+    }, acc);
+}, []);
+
+const collectInvalidQuestions = questionSets => questionSets.reduce((acc, questionSet) => {
+    if (questionSet.readOnly == true || !questionSet.pass_dependency || questionSet.readOnly == "true" || questionSet.visible == false || questionSet.visible == "false") {
+        return acc;
+    }
+
+
+    return questionSet.questions.reduce((acc2, question) => {
+        if(question.hasOwnProperty("pass_validation") && !question.pass_validation) {            
             return [...acc2, question.id];
         }
 
@@ -156,13 +172,20 @@ const getRequiredQuestionsDetail = (questionSets, requiredQuestions) => question
     }, acc);
 }, []);
 
+const validateURL = (url) => {
+    const regex = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig;
+
+    return regex.test(url);
+};
+
 const updateData = (action, state, updateState, dispatch, compType) => {
         const {
             meta: {id}
         } = action;        
 
         const { type } = action;
-        let value = "";        
+        
+        let value = "";
         
 
         if (type == "NOW_INPUT#INVALID_SET" || type == "NOW_INPUT_URL#INVALID_SET") {
@@ -191,29 +214,44 @@ const updateData = (action, state, updateState, dispatch, compType) => {
             if (valueList.length != 0 && valueList[0].length != 4) {
                 value = "";
             }
-        } */
-      
-        const { questionAnswerSet, componentData, allAttachedFiles, toAddFiles } = state;
-        const copyComponentData = JSON.parse(JSON.stringify(componentData));                    
-        const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, type: compType}, "updateValue");
-        const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);        
-        const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);        
-        const filteredRequiredQuestions = filterRequiredQuestions(copyQuestionAnswerSet, allAttachedFiles, toAddFiles, requiredQuestions);                                    
-        const hasRequiredQuestions = filteredRequiredQuestions.length != 0;
-
-        updateState({
-            referenceLabel: "",
-            referenceOptions: [],
-            questionAnswerSet: copyQuestionAnswerSet,
-            filteredComponentData,
-            filteredRequiredQuestions,
-            hasRequiredQuestions
-        });
+        } */        
+       
+        if (value != null && compType == "now-input-url" && !validateURL(value)) {
+            value = null;
+        }
         
-        dispatch(STATE_UPDATE_ACTION, {
-            state: "updated",
-            hasRequiredQuestions
-        });
+        if (value != null || compType == "now-input-url") {
+            const { questionAnswerSet, componentData, allAttachedFiles, toAddFiles } = state;
+            const copyComponentData = JSON.parse(JSON.stringify(componentData));   
+            const operationType = "updateValue"; //value == null ? "clearValue" : "updateValue";
+            const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, questionAnswerSet, {id, value, type: compType}, operationType);
+            
+            const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);        
+            
+            const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);  
+            const invalidQuestions = collectInvalidQuestions(filteredComponentData.question_sets);   
+            const hasInvalidQuestions = invalidQuestions.length != 0;
+                      
+            const filteredRequiredQuestions = filterRequiredQuestions(copyQuestionAnswerSet, allAttachedFiles, toAddFiles, requiredQuestions);                                    
+            const hasRequiredQuestions = filteredRequiredQuestions.length != 0;
+            
+            updateState({
+                referenceLabel: "",
+                referenceSubLabel: "",
+                referenceOptions: [],
+                questionAnswerSet: copyQuestionAnswerSet,
+                filteredComponentData,
+                filteredRequiredQuestions,
+                hasRequiredQuestions,
+                hasInvalidQuestions
+            });
+            
+            dispatch(STATE_UPDATE_ACTION, {
+                state: "updated",
+                hasRequiredQuestions,
+                hasInvalidQuestions
+            });
+        }        
 };
 
 const searchData = (action, state, updateState, dispatch) => {
@@ -221,96 +259,179 @@ const searchData = (action, state, updateState, dispatch) => {
     const id = action.meta.id;
     const { questionSearchTables, referenceValue } = state;
     
-    if (questionSearchTables[id].type == "search" && referenceValue != payloadValue) {
-        updateState({
-            referenceLabel: questionSearchTables[id].field,
+    if (questionSearchTables.hasOwnProperty(id) && questionSearchTables[id].hasOwnProperty("type") && questionSearchTables[id].type == "search" && referenceValue != payloadValue) {
+        let newUpdateState = {
+            referenceLabel: questionSearchTables[id].field,        
             referenceValue: payloadValue,
             searchQuestionID: id
-        });
+        };
+
+        let searchQuery =  `${questionSearchTables[id].field}LIKE${payloadValue}`;
+        let searchFields = `${questionSearchTables[id].field},sys_id`;
+
+        if (questionSearchTables[id].subfield != "") {
+            newUpdateState.referenceSubLabel = questionSearchTables[id].subfield;
+            searchQuery = `${questionSearchTables[id].field}LIKE${payloadValue}^OR${questionSearchTables[id].subfield}LIKE${payloadValue}`;
+            searchFields = `${questionSearchTables[id].field},${questionSearchTables[id].subfield},sys_id`;
+        }
+
+        updateState(newUpdateState);
 
         dispatch(TYPEAHEAD_SEARCH_REQUESTED, {
             table: questionSearchTables[id]["table"],
-            sysparm_query: `${questionSearchTables[id].field}LIKE${payloadValue}`,
-            sysparm_fields: `${questionSearchTables[id].field},sys_id`
+            sysparm_query: searchQuery,
+            sysparm_fields: searchFields
         });
     }        
 };
 
+const getDataSheetCompData = (compData) => {
+    const questions = compData.question_sets.reduce(((acc, question_set) => {
+        return [...acc, ...question_set.questions];
+    }), []);
+
+    return {
+        status: compData.status,
+        error: compData.error,
+        table: compData.table,
+        sys_id: compData.sys_id,
+        name: compData.name,
+        user_id: compData.user_id,
+        project_id: compData.project_id,
+        question_sets: [{
+            name: "Datasheet Question Set",
+            order: 0,
+            visible: true,
+            pass_dependency: true,
+            readOnly: false,
+            hideLabel: false,
+            has_dependency: false,
+            dependency: {},
+            questions
+        }]
+    };
+};
+
 const renderView = (updateState, dispatch, properties) => {
-    const { compdata, disabled, timestamp } = properties;
+    const { compdata, disabled, timestamp, datasheet } = properties;
     console.log("Question form is generated from the following component input: ");
     console.log(JSON.stringify(compdata, null, '\t'));
     
     if (compdata && compdata.status == 200 && compdata.question_sets.length != 0) {
-        const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
-        const questionSearchTables = collectSearchTables(compdata.question_sets);
+        if (!datasheet) {
+            const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
+            const questionSearchTables = collectSearchTables(compdata.question_sets);
 
-        const dragActiveStates = allAttachedFiles.reduce((acc, attachedFile) => {
-            const dragActiveState = {};
-            dragActiveState[attachedFile.recordID] = false;
+            const dragActiveStates = allAttachedFiles.reduce((acc, attachedFile) => {
+                const dragActiveState = {};
+                dragActiveState[attachedFile.recordID] = false;
 
-            return {...acc, ...dragActiveState}
-        }, {});
+                return {...acc, ...dragActiveState}
+            }, {});
 
-        const questionAnswerSet = populateQuestionAnswerSet(compdata);
-        console.log(`questionAnswerSet" ${JSON.stringify(questionAnswerSet, null, '\t')}`);
-        const copyCompData = JSON.parse(JSON.stringify(compdata));
-        let isTaskTable = false;
-        let isProjectTable = false;
-        let isActiveRecord = true;
-        let hasValues = false;
+            const questionAnswerSet = populateQuestionAnswerSet(compdata);
+            
+            const copyCompData = JSON.parse(JSON.stringify(compdata));
+            let isTaskTable = false;
+            let isProjectTable = false;
+            let isActiveRecord = true;
+            let hasValues = false;
 
-        if (compdata.table == PWC_TASK_TABLE) {
-            isTaskTable = true;
-            isActiveRecord = compdata.active == "1";
-            hasValues = compdata.has_values;
-        } else if (compdata.table == PWC_PROJECT_TABLE) {
-            isProjectTable = true;
-            isActiveRecord = compdata.active == "1";
-            hasValues = compdata.has_values;
-        }
+            if (compdata.table == PWC_TASK_TABLE) {
+                isTaskTable = true;
+                isActiveRecord = compdata.active == "1";
+                hasValues = compdata.has_values;
+            } else if (compdata.table == PWC_PROJECT_TABLE) {
+                isProjectTable = true;
+                isActiveRecord = compdata.active == "1";
+                hasValues = compdata.has_values;
+            }
 
-        
-        const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);
-        
-        let disabledForm = !isActiveRecord;
-        let hasRequiredQuestions = false;
-        let filteredRequiredQuestions = [];
+            
+            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);
+            
+            let disabledForm = !isActiveRecord;
+            let hasRequiredQuestions = false;
+            let hasInvalidQuestions = false;
+            let filteredRequiredQuestions = [];
+            
+            //console.log(`filteredComponentData: ${JSON.stringify(filteredComponentData, null, '\t')}`);
 
-        if (disabled) {
-            disabledForm = disabled;
-        } else {                
-            const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);
-            filteredRequiredQuestions = filterRequiredQuestions(questionAnswerSet, allAttachedFiles, [], requiredQuestions);
-            hasRequiredQuestions = filteredRequiredQuestions.length != 0;
-        }
-        
-        
-        updateState({
-            componentData: compdata,                
-            isLoading: false,
-            fetchStatus: "success",                
-            hasValues: hasValues,
-            recordActive: isActiveRecord,
-            closeAlerts: false,
-            allAttachedFiles,
-            filteredComponentData,
-            disabledForm,
-            questionAnswerSet,
-            isTaskTable,
-            isProjectTable,
-            hasValues,
-            dragActiveStates,
-            filteredRequiredQuestions,
-            hasRequiredQuestions,
-            questionSearchTables,
-            timestamp
-        });
+            if (disabled) {
+                disabledForm = disabled;
+            } else {                
+                const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);
+                filteredRequiredQuestions = filterRequiredQuestions(questionAnswerSet, allAttachedFiles, [], requiredQuestions);
+                const invalidQuestions = collectInvalidQuestions(filteredComponentData.question_sets);
+                hasInvalidQuestions = invalidQuestions.length != 0;
+                hasRequiredQuestions = filteredRequiredQuestions.length != 0;
+            }
+            
+            
+            updateState({
+                componentData: compdata,                
+                isLoading: false,
+                fetchStatus: "success",                
+                hasValues: hasValues,
+                recordActive: isActiveRecord,
+                closeAlerts: false,
+                allAttachedFiles,
+                filteredComponentData,
+                disabledForm,
+                questionAnswerSet,
+                isTaskTable,
+                isProjectTable,
+                hasValues,
+                dragActiveStates,
+                filteredRequiredQuestions,
+                hasRequiredQuestions,
+                hasInvalidQuestions,
+                questionSearchTables,
+                timestamp
+            });
 
-        dispatch(STATE_UPDATE_ACTION, {
-            state: "loaded",
-            hasRequiredQuestions
-        });
+            dispatch(STATE_UPDATE_ACTION, {
+                state: "loaded",
+                hasRequiredQuestions,
+                hasInvalidQuestions: false
+            });
+        } else {
+            let isTaskTable = false;
+            let isProjectTable = false;
+            let isActiveRecord = true;
+            let hasValues = false;
+
+            if (compdata.table == PWC_TASK_TABLE) {
+                isTaskTable = true;
+                isActiveRecord = compdata.active == "1";
+                hasValues = compdata.has_values;
+            } else if (compdata.table == PWC_PROJECT_TABLE) {
+                isProjectTable = true;
+                isActiveRecord = compdata.active == "1";
+                hasValues = compdata.has_values;
+            }
+
+            //getDataSheetCompData
+            //console.log(`compdata: ${JSON.stringify(getDataSheetCompData(compdata), null, '\t')}`);
+            updateState({
+                componentData: compdata,                
+                filteredComponentData: getDataSheetCompData(compdata),
+                isLoading: false,
+                fetchStatus: "success",                
+                hasValues: hasValues,
+                recordActive: isActiveRecord,
+                closeAlerts: false,
+                isTaskTable,
+                isProjectTable,
+                hasValues
+            });
+
+            dispatch(STATE_UPDATE_ACTION, {
+                state: "loaded",
+                hasRequiredQuestions: false,
+                hasInvalidQuestions: false
+            });
+        }        
     } else {
         updateState({
             isLoading: false,
@@ -336,7 +457,7 @@ export default {
 	}) => {
         const payload= action.payload;
         
-        const { componentData, hasRequiredQuestions, filteredRequiredQuestions, recordActive, questionAnswerSet, disabledForm } = state;
+        const { componentData, hasRequiredQuestions, hasInvalidQuestions, filteredRequiredQuestions, recordActive, questionAnswerSet, disabledForm, toAddFiles, toRemoveFiles } = state;
         var alertData = {};
                    
         const postData = {
@@ -345,13 +466,27 @@ export default {
             "user_id": componentData.user_id,
             "question_answer_set": questionAnswerSet
         };    
-                
-        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit")) {
+        
+        //console.log(`payload: ${JSON.stringify(payload)} - postData: ${JSON.stringify(postData, null, '\t')} - hasRequiredQuestions: ${hasRequiredQuestions} - toAddFiles: ${JSON.stringify(toAddFiles, null, '\t')}`);
+        
+        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" || payload.value == "saved")) {
             if (hasRequiredQuestions && payload.value == "submit") {
+                updateState({
+                    toSaveForm: false
+                });
+            } else if (hasRequiredQuestions && payload.value == "submit") {
                 const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                
                 alertData.category = "required_fields_missing";
                 alertData.type = "complex";
                 alertData.requiredQuestions = requiredQuestions;
+                alertData.message = "";
+
+                dispatch(ALERT_ACTION, alertData);
+            } else if (hasInvalidQuestions && payload.value == "submit") {
+                const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                
+                alertData.category = "invalid_fields";
+                alertData.type = "complex";
+                alertData.hasInvalidQuestions = hasInvalidQuestions;
                 alertData.message = "";
 
                 dispatch(ALERT_ACTION, alertData);
@@ -367,7 +502,7 @@ export default {
                 alertData.message = "Question form is disabled";
                 
                 dispatch(ALERT_ACTION, alertData);
-            } else if (componentData.question_sets.length == 0) {
+            } /* else if (componentData.question_sets.length == 0) {
                 alertData.category = "no_data";
                 alertData.type = "simple";
                 alertData.message = "No Question Sets are passed";
@@ -379,10 +514,14 @@ export default {
                 alertData.message = "No Data is populated";
                 
                 dispatch(ALERT_ACTION, alertData);
-            } if (payload.value == "save") {                
+            } */ else if (payload.value == "save") {                
                 dispatch(SAVE_ACTION, postData);
                 dispatch(DELETE_FILES_ACTION);
                 dispatch(ADD_FILES_ACTION);
+
+                updateState({
+                    toSaveForm: true
+                });
             } else if (payload.value == "submit") {
                 dispatch(SUBMIT_ACTION, postData);
                 dispatch(DELETE_FILES_ACTION);
@@ -586,6 +725,9 @@ export default {
                 fetchStatus: ""
             });
         }        
+    }, 
+    ["NOW_TEXTAREA#INVALID_SET"]: ({ action, state, updateState }) => {
+        console.log(JSON.stringify(action, null, '\t'));
     }, */
     [ATTACHMENT_POST_SUCCEEDED]: ({ action, state, updateState }) => {
         console.log("File is attached");
@@ -647,14 +789,20 @@ export default {
         errorActionType: TYPEAHEAD_SEARCH_FAILED,
     }),
     [TYPEAHEAD_SEARCH_SUCCEEDED]: ({ action, state, updateState }) => {        
-        const { referenceLabel, questionSearchTables, searchQuestionID } = state;          
+        const { referenceLabel, referenceSubLabel, questionSearchTables, searchQuestionID } = state;          
         const result = action.payload.result;
 
         const options = result.map((option) => {
-            return {
+            let newOption = {
                 "id": option.sys_id,
                 "label": option[referenceLabel]
             };
+
+            if (option.hasOwnProperty(referenceSubLabel)) {
+                newOption.sublabel = option[referenceSubLabel];
+            }
+
+            return newOption;
         });
 
         const copyQuestionSearchTables = {...questionSearchTables};
@@ -673,6 +821,7 @@ export default {
         
         updateState({
             referenceLabel: "",
+            referenceSubLabel: "",
             referenceValue: "",
             referenceOptions: []
         });
@@ -683,6 +832,7 @@ export default {
     [NOW_TYPEAHEAD_INVALID_SET]: ({ updateState }) => {
         updateState({
             referenceLabel: "",
+            referenceSubLabel: "",
             referenceValue: "",
             referenceOptions: []
         });
@@ -690,6 +840,7 @@ export default {
     [NOW_TYPEAHEAD_MULTI_INVALID_SET]: ({ updateState }) => {
         updateState({
             referenceLabel: "",
+            referenceSubLabel: "",
             referenceValue: "",
             referenceOptions: []
         });

@@ -76,6 +76,18 @@
   box-sizing: border-box;
 }
 
+.max-width-95 {
+  max-width: 95%;
+}
+
+.link-data-sheet {
+  text-overflow: ellipsis;
+  //width: 200px;
+  max-width: 500px;
+  overflow: hidden;
+  display: inline-block;
+}
+
 .read-only-qs-container {
   gap: 20px;
   display: grid;
@@ -114,11 +126,32 @@
   background-color: RGB(var(--now-pill--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255))));
 }
 
+.comp-gen {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.save-form-container {
+  display: flex;
+  flex-direction: row;
+  padding-left: 20px;
+  gap: 10px;
+  align-items: center;
+}
+
 .pwc-pill-button-label {
   display: block;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.mandatory-file-label-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;  
+  color: red;  
 }
 
 .required-questions-card-container {
@@ -127,6 +160,16 @@
   padding: 0.5rem;
   gap: 5px;  
   max-width: 1280px;
+  border: 1px solid var(--now-color--neutral-3, 209,214,214);
+  border-radius: 10px;
+}
+
+.validation-box {
+  width: 95%;
+  background-color: #F1CECD;
+  color: #161B1C;
+  padding: 5px 10px;
+  margin-bottom: 5px;
 }
 
 .required-questions-card-title {
@@ -138,6 +181,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 5px;
 }
 
 .general-flex-container {

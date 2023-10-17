@@ -36,6 +36,24 @@ export default function filterComponentData ( componentData, questionAnswerSet )
                                 let option = question.options[index];
                                 option.checked = qaSet[qaIndex].value == option.id;
                             }
+                        } else if (question.type == "now-textarea") {
+                            question.value = qaSet[qaIndex].value;      
+                            console.log(`${question.label} - ${qaSet[qaIndex].value.length} - ${parseInt(question.properties.maxlength) < qaSet[qaIndex].value.length}`);
+                            if (parseInt(question.properties.maxlength) < qaSet[qaIndex].value.length) {
+                                question.pass_validation = false;
+                                question.validation_msg = `Text exceed the max length of textarea: ${question.properties.maxlength}`;
+                            } else {
+                                question.pass_validation = true;
+                            }
+                        } else if (question.type == "now-input-url") {
+                            question.value = qaSet[qaIndex].value;      
+                            
+                            if (qaSet[qaIndex].value == null) {
+                                question.pass_validation = false;
+                                question.validation_msg = `URL is not in the right format`;
+                            } else {
+                                question.pass_validation = true;
+                            }
                         } else {
                             question.value = qaSet[qaIndex].value;      
                         }

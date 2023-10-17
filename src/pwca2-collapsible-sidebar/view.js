@@ -4,7 +4,7 @@ import '@servicenow/now-icon';
 import { BASE_URL } from './constants';
 import { COLLAPSE_ACTION, PWC_LOGO_PATH } from './constants';
 
-const getOpenedSidebar = (dispatch, updateState, sidebarData, page, baseUrl) => {
+const getOpenedSidebar = (dispatch, updateState, sidebarData, page, baseUrl, iconOnly) => {
     /*
         <div className="pwc-sidebar-bottom">
             <div className="pwc-collapse-section" on-click={() => toggleCollapsedSection(dispatch, updateState, true)}>                
@@ -21,14 +21,14 @@ const getOpenedSidebar = (dispatch, updateState, sidebarData, page, baseUrl) => 
         <div className="pwc-sidebar">        
             <div className="pwc-sidebar-top">  
                 <div className="pwc-menu">
-                    {generateSidebarMenuOptions(false, sidebarData, page, baseUrl)}
+                    {generateSidebarMenuOptions(false, sidebarData, page, baseUrl, iconOnly)}
                 </div>
             </div>                                        
         </div> 
     );
 }
 
-const getClosedSidebar = (dispatch, updateState, sidebarData, page, baseUrl) => {
+const getClosedSidebar = (dispatch, updateState, sidebarData, page, baseUrl, iconOnly) => {
     /*
         <div className="pwc-sidebar-bottom">
             <div className="pwc-collapse-section" on-click={() => toggleCollapsedSection(dispatch, updateState, false)}>                
@@ -43,7 +43,7 @@ const getClosedSidebar = (dispatch, updateState, sidebarData, page, baseUrl) => 
         <div className="pwc-sidebar">        
             <div className="pwc-sidebar-top">  
                 <div className="pwc-menu">
-                    {generateSidebarMenuOptions(true, sidebarData, page, baseUrl)}
+                    {generateSidebarMenuOptions(true, sidebarData, page, baseUrl, iconOnly)}
                 </div>
             </div>                            
         </div> 
@@ -61,7 +61,7 @@ const toggleCollapsedSection = (dispatch, updateState, collapsed) => {
     dispatch(COLLAPSE_ACTION, {collapsedWidth});
 };
 
-const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl) => {   
+const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl, iconOnly) => {   
 
     return (
         <div>
@@ -69,7 +69,7 @@ const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl) => {
                 sidebarData.map(menuOption => {
                     return (
                         <div>
-                            {generateSidebarMenuOption(isMobile, menuOption, page, baseUrl)}
+                            {generateSidebarMenuOption(isMobile, menuOption, page, baseUrl, iconOnly)}
                         </div>
                     );
                 })
@@ -78,7 +78,7 @@ const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl) => {
     );    
 };
 
-const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl) => {
+const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly) => {
     let menuOptionClass = "";// isMobile ? "pwc-menu-item-mbl" : "pwc-menu-item";
     const url = baseUrl + "" + menuOption.url;
     
@@ -95,28 +95,30 @@ const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl) => {
             menuOptionClass = "pwc-menu-item menu-item-unselected";
         }
     }
-    
+    //iconOnly
+    const menuOptionLabel = !iconOnly ? menuOption.label : "";
+
     return (
         <div className={menuOptionClass} component-id={menuOption.id} id={menuOption.id} on-click={() => {
             window.location.href = url;
         }}>
             {isMobile ? (
                 <a href={url}>
-                    <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon"></now-icon>
-                    <span className="pwc-tooltip">{menuOption.label}</span>
+                    <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon" title={menuOption.label}></now-icon>
+                    <span className="pwc-tooltip">{menuOptionLabel}</span>
                 </a> 
             ) : (
                 <a href={url}>
-                    <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon"></now-icon>
+                    <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon" title={menuOption.label}></now-icon>
                     <span className="pwc-menu-item-text">                        
                         {
                             !menuOption.new_items ? (
                                 <span>
-                                    {menuOption.label}
+                                    {menuOptionLabel}
                                 </span>
                             ) : (
                                 <span>
-                                    {menuOption.label}
+                                    {menuOptionLabel}
                                     <span className="pwc-item-count">
                                         {menuOption.record_count}
                                     </span>
@@ -141,13 +143,14 @@ const buildSidebarSection = (
     collapsed,
     sidebarData,
     page,
-    baseUrl
+    baseUrl,
+    iconOnly
 ) => {
-    return !collapsed ? getOpenedSidebar(dispatch, updateState, sidebarData, page, baseUrl) : getClosedSidebar(dispatch, updateState, sidebarData, page, baseUrl);
+    return !collapsed ? getOpenedSidebar(dispatch, updateState, sidebarData, page, baseUrl, iconOnly) : getClosedSidebar(dispatch, updateState, sidebarData, page, baseUrl, iconOnly);
 };
 
 export default (state, {dispatch, updateState}) => {
-	const {isLoading, collapsed, sidebarData, properties} = state;
+	const {isLoading, collapsed, sidebarData, properties, iconOnly} = state;
     const { page } = properties;
     
 
@@ -157,7 +160,7 @@ export default (state, {dispatch, updateState}) => {
 			{isLoading ? (
 				<now-loader label="Loading..." size="lg"></now-loader>
 			) : (
-				buildSidebarSection(dispatch, updateState, collapsed, sidebarData, page, BASE_URL)
+				buildSidebarSection(dispatch, updateState, collapsed, sidebarData, page, BASE_URL, iconOnly)
 			)}
 		</div>
 	);

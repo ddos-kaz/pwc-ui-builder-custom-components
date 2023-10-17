@@ -117,7 +117,23 @@
 					"description":"Array of objects containing sidebar menu",
 					"valueType":"string",
 					"required": true
-				 }
+				},
+				{
+					"name":"iconOnly",
+					"label":"Display Only Icon",
+					"fieldType":"boolean",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"boolean"
+					   }
+					},
+					"defaultValue":false,
+					"description": "Display menu icon only",
+					"selectable":false,
+					"valueType":"string",
+					"mandatory":false
+				}
 			]
 		},		
 		"pwca2-component-generation-v2": {

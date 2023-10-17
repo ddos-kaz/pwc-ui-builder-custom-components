@@ -10,47 +10,18 @@ createCustomElement('pwca2-collapsible-sidebar', {
 	initialState: {
         isLoading: false,
 		collapsed: false,
-		sidebarData: []
+		sidebarData: [],
+		iconOnly: false
 	},
 	properties: {
 		sidebarData: {
-			default: [
-				{
-					"label": "Dashboard",
-					"id": "dashboard",
-					"url": "dashboard",
-					"icon_name": "home-outline",
-					"new_items": false,
-					"record_count": 0
-				}, {
-					"label": "Projects",
-					"id": "projects",
-					"url": "projects",
-					"icon_name": "document-outline",
-					"new_items": true,
-					"record_count": 25
-				}, {
-					"label": "Reports",
-					"id": "reports",
-					"url": "reports",
-					"icon_name": "circle-chevron-down-outline",
-					"new_items": false,
-					"record_count": 0
-				}, {
-					"label": "Support",
-					"id": "support",
-					"url": "support",
-					"icon_name": "circle-question-outline",
-					"new_items": false,
-					"record_count": 0
-				}
-			]
+			default: [{"id":"dashboard","label":"Dashboard","url":"dashboard","icon_name":"home-outline"},{"id":"projects","label":"All projects","url":"projects","icon_name":"documents-outline"},{"id":"my-projects","label":"My projects","url":"projects/params/filter/my","icon_name":"document-outline"},{"id":"tasks","label":"My tasks","url":"tasks","icon_name":"checklist-fill"},{"id":"unassigned-roles","label":"Unassigned roles","url":"unassigned-roles","icon_name":"user-tag-outline"},{"id":"support","label":"Support","url":"support","icon_name":"circle-question-outline"}]
 		},
 		page: {
 			default: "dashboard"
 		},
-		baseUrl: {
-			default: ""
+		iconOnly: {
+			default: false
 		}
 	},
 	styles,
