@@ -489,8 +489,8 @@ export default {
         };    
         
         
-        
-        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" || payload.value == "saved")) {
+        //|| payload.value == "saved"
+        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" )) {
             if (hasRequiredQuestions && payload.value == "submit") {
                 const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                
                 alertData.category = "required_fields_missing";

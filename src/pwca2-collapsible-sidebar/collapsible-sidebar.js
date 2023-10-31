@@ -21,7 +21,7 @@ createCustomElement('pwca2-collapsible-sidebar', {
 			default: "dashboard"
 		},
 		iconOnly: {
-			default: false
+			default: true
 		}
 	},
 	styles,

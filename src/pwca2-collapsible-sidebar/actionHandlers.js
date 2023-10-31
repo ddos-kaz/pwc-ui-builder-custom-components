@@ -7,9 +7,14 @@ export default {
 	}) => {
         const { page, sidebarData, iconOnly } = properties;
 				
-		console.log("Sidebar initialized with following options: " + JSON.stringify(sidebarData, null, '\t'));
+		console.log("Sidebar initialized with following menu options: " + JSON.stringify(sidebarData, null, '\t'));
 		
-		updateState({page, sidebarData, iconOnly});
+		updateState({
+			page, 
+			sidebarData, 
+			iconOnly,
+			collapsed: iconOnly
+		});
 	}, 
 	[actionTypes.COMPONENT_PROPERTY_CHANGED]: ({
 		action,
@@ -19,7 +24,8 @@ export default {
 
 		if (payload.name == "iconOnly") {
 			updateState({
-				iconOnly: payload.value
+				iconOnly: payload.value,
+				collapsed: payload.value
 			});
 		}
 	}

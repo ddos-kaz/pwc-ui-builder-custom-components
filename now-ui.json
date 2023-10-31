@@ -319,6 +319,189 @@
 				}
 			]
 	    },
+		"pwca2-component-generation-v3": {
+			"innerComponents": [
+				"now-heading", 
+				"now-dropdown", 
+				"now-textarea", 
+				"now-input", 
+				"now-radio-buttons", 
+				"now-checkbox", 
+				"now-toggle", 
+				"now-rich-text", 
+				"now-loader",
+				"now-alert",
+				"now-template-message",
+				"now-button",
+				"now-card",				
+				"now-illustration",
+				"now-button",
+				"now-alert",
+				"now-typeahead",
+				"now-template-card",
+				"now-icon",
+				"now-select",
+				"now-label-value"
+			],
+			"uiBuilder": {
+				"associatedTypes": ["global.core", "global.landing-page"],
+				"label": "Component Generation v3",
+				"icon": "puzzle-outline",
+				"description": "Generate components from JSON property. Partial autosave is used.",
+				"category": "primitives"
+			},			
+			"actions": [
+				{
+					"action": "PWC_COMPONENT_GENERATION_SUBMIT_ACTION",
+					"label": "PwC Component Generation Submit Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_SAVE_ACTION",
+					"label": "PwC Component Generation Save Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_ALERT_ACTION",
+					"label": "PwC Component Generation ALERT Action"
+				},
+				{
+					"action": "PWC_COMPONENT_GENERATION_COMP_STATE_UPDATE_ACTION",
+					"label": "PwC Component Generation Component State Update Action"
+				}
+			],
+			"properties": [
+				{
+					"name":"compdata",
+					"label":"Component Data",
+					"fieldType": "json",
+					"readOnly": false,
+					"typeMetadata": {
+					   "schema": {
+						  "type": "object",
+						  "properties": {
+							"status": {
+								"type": "number"
+							},
+							"error": {
+								"type": "string"
+							},
+							"table": {
+								"type": "string"
+							},
+							"sys_id": {
+								"type": "string"
+							}, 
+							"name": {
+								"type": "string"
+							}, 
+							"question_sets": {
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+									   "name": {
+										  "type": "string"
+									   },
+									   "questions": {
+										  "type": "array",
+										  "items": {										
+											"type": "object",
+											"properties": {
+
+											}
+										  }
+									   }
+									}
+								}
+							}
+						  }
+					   }
+					},
+					"defaultValue": "{}",
+					"description":"Array of objects containing component data",
+					"valueType":"string",
+					"mandatory": true
+				},
+				{
+					"name":"disabled",
+					"label":"Disabled",
+					"fieldType":"boolean",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"boolean"
+					   }
+					},
+					"defaultValue":false,
+					"description": "Disables the question form",
+					"selectable":false,
+					"valueType":"string",
+					"mandatory":false
+				},
+				{
+					"name": "state",
+					"label": "State",
+					"description": "State of the component",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name": "timestamp",
+					"label": "Timestamp",
+					"description": "Timestamp",
+					"readOnly": false,
+					"fieldType": "string",
+					"required": true,
+					"defaultValue": ""
+				},
+				{
+					"name": "position",
+					"label": "Position",
+					"description": "Position of the required questions card",
+					"valueType":"string",
+					"readOnly": false,
+					"fieldType": "choice",
+					"typeMetadata":{
+						"choices":[
+							{
+								"label":"Top",
+								"value":"top"
+							},
+							{
+								"label":"Bottom",
+								"value":"bottom"
+							}
+						],
+						"schema":{
+							"type":"string",
+							"enum":[
+								"top",
+								"bottom"
+							]
+						}
+					},
+					"mandatory": true,
+					"defaultValue": "top"
+				},
+				{
+					"name":"datasheet",
+					"label":"Data Sheet",
+					"fieldType":"boolean",
+					"readOnly":false,
+					"typeMetadata":{
+					   "schema":{
+						  "type":"boolean"
+					   }
+					},
+					"defaultValue":false,
+					"description": "Display data in the data sheet format",
+					"selectable":false,
+					"valueType":"string",
+					"mandatory":false
+				}
+			]
+	    },
 		"pwca2-attachment-loader": {
 	        "innerComponents": [
 				"now-template-card",

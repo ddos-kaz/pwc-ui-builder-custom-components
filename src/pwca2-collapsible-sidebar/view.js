@@ -40,7 +40,7 @@ const getClosedSidebar = (dispatch, updateState, sidebarData, page, baseUrl, ico
     */
 
     return ( 
-        <div className="pwc-sidebar">        
+        <div className="pwc-sidebar-mbl">        
             <div className="pwc-sidebar-top">  
                 <div className="pwc-menu">
                     {generateSidebarMenuOptions(true, sidebarData, page, baseUrl, iconOnly)}
@@ -77,7 +77,7 @@ const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl, iconOn
         </div>
     );    
 };
-
+ 
 const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly) => {
     let menuOptionClass = "";// isMobile ? "pwc-menu-item-mbl" : "pwc-menu-item";
     const url = baseUrl + "" + menuOption.url;
@@ -96,7 +96,7 @@ const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly
         }
     }
     //iconOnly
-    const menuOptionLabel = !iconOnly ? menuOption.label : "";
+    const menuOptionLabel = menuOption.label; //!iconOnly ? menuOption.label : "";
 
     return (
         <div className={menuOptionClass} component-id={menuOption.id} id={menuOption.id} on-click={() => {

@@ -1525,7 +1525,7 @@ const generateComponents = (
         );
     }                        
 
-
+    //<now-button component-id={"save"} id={"save"} label="Save Record" variant="primary" size="md" icon="" config-aria={{}} tooltip-content=""></now-button>
     return (
         <div>      
             {toSaveForm ? (
@@ -1555,9 +1555,7 @@ const generateComponents = (
                         {buildRequiredQuestionsCard(state)}
                     </div>
                 </div>
-            )}            
-            
-            <now-button component-id={"save"} id={"save"} label="Save Record" variant="primary" size="md" icon="" config-aria={{}} tooltip-content=""></now-button>        
+            )}                                    
         </div>
     ); 
 };

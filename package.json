@@ -1,6 +1,6 @@
 {
 	"name": "@pwca2/component-generation",
-	"version": "0.0.1",
+	"version": "0.1.3",
 	"private": false,
 	"description": "generate the list of components from passed id",
 	"keywords": [
