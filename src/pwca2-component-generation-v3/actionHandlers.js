@@ -217,9 +217,7 @@ const updateData = (action, state, updateState, dispatch, compType) => {
             }
         } else {
             value = action.payload.value;            
-        }
-
-        console.log(`${id} - ${JSON.stringify(value, null, '\t')} - ${type} - ${compType}`);
+        }        
     
         /* if (compType == "now-input") {
             const valueList = value.split('-');
@@ -243,9 +241,9 @@ const updateData = (action, state, updateState, dispatch, compType) => {
             const operationType = "updateValue"; //value == null ? "clearValue" : "updateValue";
             const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, operationType, questionAnswerSet, {id, value, type: compType});            
             const copyPartialQuestionAnswerSet = populateQuestionAnswerSet(componentData, operationType, partialQuestionAnswerSet, {id, value, type: compType});
-            console.log(`copyPartialQuestionAnswerSet: ${JSON.stringify(copyPartialQuestionAnswerSet, null, '\t')}`);
-            const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);        
-            console.log(`filteredComponentData: ${JSON.stringify(filteredComponentData, null, '\t')}`);
+            
+            const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);
+
             const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);  
             const invalidQuestions = collectInvalidQuestions(filteredComponentData.question_sets);   
             const hasInvalidQuestions = invalidQuestions.length != 0;
@@ -258,7 +256,7 @@ const updateData = (action, state, updateState, dispatch, compType) => {
                 referenceSubLabel: "",
                 referenceOptions: [],
                 questionAnswerSet: copyQuestionAnswerSet,
-                //partialQuestionAnswerSet: copyPartialQuestionAnswerSet,
+                partialQuestionAnswerSet: copyPartialQuestionAnswerSet,
                 filteredComponentData,
                 filteredRequiredQuestions,
                 hasRequiredQuestions,
@@ -487,10 +485,8 @@ export default {
             "user_id": componentData.user_id
             //"question_answer_set": questionAnswerSet
         };    
-        
-        
-        //|| payload.value == "saved"
-        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" )) {
+        console.log(`${payload.name} - ${payload.value}`);
+        if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" || payload.value == "saved")) {
             if (hasRequiredQuestions && payload.value == "submit") {
                 const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                
                 alertData.category = "required_fields_missing";
@@ -547,7 +543,6 @@ export default {
                 dispatch(DELETE_FILES_ACTION);
                 dispatch(ADD_FILES_ACTION);
             }  else if (payload.value == "saved") {
-                console.log(`HERE: ${payload.value}`)
                 updateState({
                     toSaveForm: false,
                     partialQuestionAnswerSet: []
@@ -575,8 +570,6 @@ export default {
             "user_id": componentData.user_id,
             "question_answer_set": questionAnswerSet
         };
-
-        console.log(`id: ${id}`);
 
         if (id == "submit") {
             updateState({
@@ -784,10 +777,10 @@ export default {
 
         const copyToAddFiles = [...toAddFiles];
         copyToAddFiles.splice(index, 1);
-        console.log(`toAddFiles: ${JSON.stringify(toAddFiles, null, '\t')}`);
+        
         const copyAllAttachedFiles = [...allAttachedFiles];
         copyAllAttachedFiles.push(toAddFile);
-        console.log(`allAttachedFiles: ${JSON.stringify(copyAllAttachedFiles, null, '\t')}`);
+        
         updateState({
             toAddFiles: copyToAddFiles,
             allAttachedFiles: copyAllAttachedFiles

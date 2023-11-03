@@ -13,7 +13,7 @@ export default function populateData(
     
 	if (idValue.hasOwnProperty("id")) {
         const index = getIndex(questionAnswerSet, idValue.id);
-        console.log(`operation: ${operation} : ${index}`);
+        //console.log(`operation: ${operation} : ${index}`);
         if (index == -1) {
             if (operation == "updateValue") {
                 if (idValue.type == "now-typeahead-multi" || idValue.type == "now-typeahead-multi-choice") {

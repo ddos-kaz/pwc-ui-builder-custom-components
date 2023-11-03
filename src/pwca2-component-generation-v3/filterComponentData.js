@@ -126,13 +126,21 @@ const passDependency = (dependencyObj) => {
 
             if (dependencyObj.cond_type == "==") {
                 
-                if (qaSetValue.toString().toLowerCase() == dependencyValue.toLowerCase()) {
+                if (Array.isArray(qaSetValue)) {
+                    return (
+                        qaSetValue.filter((val) => val.id == dependencyValue).length > 0
+                    );
+		        } else if (qaSetValue.toString().toLowerCase() == dependencyValue.toLowerCase()) {
                     return true;
                 } else {
                     return false;
                 }
             } else if (dependencyObj.cond_type == "!=") {
-                if (qaSetValue.toString().toLowerCase() != dependencyValue && qaSetValue.toString() != "") {
+                if (Array.isArray(qaSetValue)) {
+                    return (
+                        qaSetValue.filter((val) => val.id == dependencyValue).length == 0
+                    );
+		        } else if (qaSetValue.toString().toLowerCase() != dependencyValue && qaSetValue.toString() != "") {
                     return true;
                 } else {
                     return false;

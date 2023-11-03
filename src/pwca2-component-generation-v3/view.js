@@ -583,7 +583,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                     
                     if (question.required.toString() == 'true') {
                         if (question.type== "pwc-attachment") {
-                            const attachedFiles = allAttachedFiles.filter(file => file.questionID == id);
+                            const attachedFiles = allAttachedFiles.filter(file => file.questionID == question.id);
 
                             if (attachedFiles.length == 0 && getIndexByKey(toAddFiles, "questionID", question.id) == -1) {
                                 required = true;
@@ -983,9 +983,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                     </li>                                    
                                 )                            
                             );
-                        }                        
-                        
-                        console.log(`${question.label}: ${JSON.stringify(question.value, null, '\t')}`);;
+                        }                                                                       
 
                         const hideLabel = (question.hideLabel == "true" || question.hideLabel == true) ? true : false;
                         const labelClassName = required ? "pwc-label-size required-icon" : "pwc-label-size"
