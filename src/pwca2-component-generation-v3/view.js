@@ -577,7 +577,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                             );
                         }
                     }
-
+ 
                     let required = false;
                     const questionLabel = (question.hideLabel == true || question.hideLabel == "true") ? "" : question.label;
                     
@@ -1524,9 +1524,8 @@ const generateComponents = (
     }                        
 
     //<now-button component-id={"save"} id={"save"} label="Save Record" variant="primary" size="md" icon="" config-aria={{}} tooltip-content=""></now-button>
-    return (
-        <div>      
-            {toSaveForm ? (
+    /*
+     {toSaveForm ? (
                 <div className="save-form-container">                    
                     <now-icon icon="save-outline" size="md" spin={true}></now-icon>
                     <p>Saving...</p>
@@ -1534,7 +1533,9 @@ const generateComponents = (
             ) : (
                 <div></div>
             )}
-                              
+    */
+    return (
+        <div>                   
             {position == "top" ? (
                 <div className="general-flex-container">            
                     <div>

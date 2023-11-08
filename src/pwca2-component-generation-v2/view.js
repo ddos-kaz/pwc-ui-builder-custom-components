@@ -583,7 +583,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                     
                     if (question.required.toString() == 'true') {
                         if (question.type== "pwc-attachment") {
-                            const attachedFiles = allAttachedFiles.filter(file => file.questionID == id);
+                            const attachedFiles = allAttachedFiles.filter(file => file.questionID == question.id);
 
                             if (attachedFiles.length == 0 && getIndexByKey(toAddFiles, "questionID", question.id) == -1) {
                                 required = true;
@@ -1526,17 +1526,19 @@ const generateComponents = (
     }                        
 
     //<now-button component-id={"save"} id={"save"} label="Save Record" variant="primary" size="md" icon="" config-aria={{}} tooltip-content=""></now-button>
-
+    /*
+        {toSaveForm ? (
+            <div className="save-form-container">                    
+                <now-icon icon="save-outline" size="md" spin={true}></now-icon>
+                <p>Saving...</p>
+            </div>
+        ) : (
+            <div></div>
+        )}
+    */
     return (
         <div>      
-            {toSaveForm ? (
-                <div className="save-form-container">                    
-                    <now-icon icon="save-outline" size="md" spin={true}></now-icon>
-                    <p>Saving...</p>
-                </div>
-            ) : (
-                <div></div>
-            )}
+            
                               
             {position == "top" ? (
                 <div className="general-flex-container">            

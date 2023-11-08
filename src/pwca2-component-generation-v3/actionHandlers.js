@@ -476,7 +476,7 @@ export default {
 	}) => {
         const payload= action.payload;
         
-        const { componentData, hasRequiredQuestions, hasInvalidQuestions, filteredRequiredQuestions, recordActive, questionAnswerSet, partialQuestionAnswerSet, disabledForm, toAddFiles, toRemoveFiles } = state;
+        const { componentData, hasRequiredQuestions, hasInvalidQuestions, filteredRequiredQuestions, recordActive, questionAnswerSet, partialQuestionAnswerSet, disabledForm, toAddFiles, toRemoveFiles, isTaskTable } = state;
         var alertData = {};
                    
         let postData = {
@@ -485,6 +485,11 @@ export default {
             "user_id": componentData.user_id
             //"question_answer_set": questionAnswerSet
         };    
+
+        if (isTaskTable) {
+            postData.task_id = componentData.task_id || "";
+        }
+        
         console.log(`${payload.name} - ${payload.value}`);
         if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" || payload.value == "saved")) {
             if (hasRequiredQuestions && payload.value == "submit") {
@@ -558,7 +563,7 @@ export default {
             });
         }
     },
-    [NOW_BUTTON_CLICKED]: ({ dispatch, updateState, state, action }) => {
+    /* [NOW_BUTTON_CLICKED]: ({ dispatch, updateState, state, action }) => {
         const { questionAnswerSet, componentData } = state;
         const {
             meta: {id}
@@ -589,7 +594,7 @@ export default {
                 toSaveForm: true
             }); 
         }       
-    },
+    }, */
     [DELETE_FILES_ACTION]: ({ state, dispatch, updateState }) => {
         const { toRemoveFiles } = state;
         console.log(`Files removal for ${toRemoveFiles.length} has been started.`)

@@ -125,7 +125,7 @@ const passDependency = (dependencyObj) => {
             const dependencyValue = dependencyObj.value;
 
             if (dependencyObj.cond_type == "==") {
-                
+                 
                 if (Array.isArray(qaSetValue)) {
                     return (
                         qaSetValue.filter((val) => val.id == dependencyValue).length > 0

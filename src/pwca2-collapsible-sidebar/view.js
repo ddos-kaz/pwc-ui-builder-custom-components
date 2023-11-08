@@ -80,7 +80,7 @@ const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl, iconOn
  
 const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly) => {
     let menuOptionClass = "";// isMobile ? "pwc-menu-item-mbl" : "pwc-menu-item";
-    const url = baseUrl + "" + menuOption.url;
+    const url = menuOption.url.indexOf("https") == 0 ? menuOption.url : `${baseUrl}${menuOption.url}`;
     
     if (isMobile) {
         if (page == menuOption.url) {
