@@ -236,13 +236,13 @@ const updateData = (action, state, updateState, dispatch, compType) => {
         } */
         
         if (value != null || compType == "now-input-url") {
-            const { partialQuestionAnswerSet, questionAnswerSet, componentData, allAttachedFiles, toAddFiles } = state;
+            const { partialQuestionAnswerSet, questionAnswerSet, componentData, allAttachedFiles, toAddFiles, externalQuestionsValues } = state;
             const copyComponentData = JSON.parse(JSON.stringify(componentData));   
             const operationType = "updateValue"; //value == null ? "clearValue" : "updateValue";
             const copyQuestionAnswerSet = populateQuestionAnswerSet(componentData, operationType, questionAnswerSet, {id, value, type: compType});            
             const copyPartialQuestionAnswerSet = populateQuestionAnswerSet(componentData, operationType, partialQuestionAnswerSet, {id, value, type: compType});
             
-            const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet);
+            const filteredComponentData = filterComponentData(copyComponentData, copyQuestionAnswerSet, externalQuestionsValues);
 
             const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);  
             const invalidQuestions = collectInvalidQuestions(filteredComponentData.question_sets);   
@@ -339,6 +339,7 @@ const renderView = (updateState, dispatch, properties) => {
         if (!datasheet) {
             const allAttachedFiles = collectAttachedFiles(compdata.question_sets);
             const questionSearchTables = collectSearchTables(compdata.question_sets);
+            const externalQuestionsValues = compdata.external_questions_values;
 
             const dragActiveStates = allAttachedFiles.reduce((acc, attachedFile) => {
                 const dragActiveState = {};
@@ -366,8 +367,8 @@ const renderView = (updateState, dispatch, properties) => {
             }
 
             
-            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);
-            
+            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet, externalQuestionsValues);
+           
             let disabledForm = !isActiveRecord;
             let hasRequiredQuestions = false;
             let hasInvalidQuestions = false;
@@ -378,7 +379,7 @@ const renderView = (updateState, dispatch, properties) => {
             } else {                
                 const requiredQuestions = collectRequiredQuestions(filteredComponentData.question_sets);
                 filteredRequiredQuestions = filterRequiredQuestions(questionAnswerSet, allAttachedFiles, [], requiredQuestions);
-                
+               
                 const invalidQuestions = collectInvalidQuestions(filteredComponentData.question_sets);
                 hasInvalidQuestions = invalidQuestions.length != 0;
                 hasRequiredQuestions = filteredRequiredQuestions.length != 0;
@@ -403,7 +404,8 @@ const renderView = (updateState, dispatch, properties) => {
                 hasRequiredQuestions,
                 hasInvalidQuestions,
                 questionSearchTables,
-                timestamp
+                timestamp,
+                externalQuestionsValues
             });
 
             dispatch(STATE_UPDATE_ACTION, {
@@ -413,7 +415,7 @@ const renderView = (updateState, dispatch, properties) => {
             });
         } else {
             const questionAnswerSet = populateQuestionAnswerSet(compdata, "insertValues");
-            
+            const externalQuestionsValues = compdata.external_questions_values;
             const copyCompData = JSON.parse(JSON.stringify(compdata));
 
             let isTaskTable = false;
@@ -431,10 +433,11 @@ const renderView = (updateState, dispatch, properties) => {
                 hasValues = compdata.has_values;
             }
             
-            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet);            
-            
+            const filteredComponentData = filterComponentData(copyCompData, questionAnswerSet, externalQuestionsValues);            
+           
             updateState({
-                componentData: compdata,                
+                componentData: compdata,     
+                externalQuestionsValues,           
                 filteredComponentData: getDataSheetCompData(filteredComponentData),
                 isLoading: false,
                 fetchStatus: "success",                
@@ -490,7 +493,7 @@ export default {
             postData.task_id = componentData.task_id || "";
         }
         
-        console.log(`${payload.name} - ${payload.value}`);
+      
         if (payload.name == "state" && (payload.value == "save" || payload.value == "submit" || payload.value == "saved")) {
             if (hasRequiredQuestions && payload.value == "submit") {
                 const requiredQuestions = getRequiredQuestionsDetail(componentData.question_sets, filteredRequiredQuestions);                

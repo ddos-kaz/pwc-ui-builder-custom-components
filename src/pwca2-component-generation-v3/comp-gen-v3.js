@@ -38,763 +38,1168 @@ createCustomElement('pwca2-component-generation-v3', {
 		timestamp: "",
 		displayRemoveFileModal: false,
 		toRemoveFile: {},
-		toSaveForm: false
+		toSaveForm: false,
+		externalQuestionsValues: {}
 	}, 
 	properties: {
 		compdata: {
 			default: {
 				"status": 200,
 				"error": "",
-				"table": "x_pwca2_0011077_question_set",
-				"sys_id": "4aba7b3adbc1799002fc5117f39619c7",
-				"name": "",
+				"table": "x_pwca2_0011077_project",
+				"sys_id": "4bc2bd101bee3910a221ddb7ab4bcba0",
+				"name": "Demand Registration",
 				"question_sets": [
-				  {
-					"name": "Testing of 683",
-					"questions": [
-					  {
-						"label": "Heading label",
-						"name": "heading_name",
-						"order": "100",
-						"id": "d2da7bf6dbc1799002fc5117f3961997",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-heading",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "title-secondary",
-						  "tooltip": ""
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Rich Text Label",
-						"name": "rich_text_name",
-						"order": "125",
-						"id": "5eda7bf6dbc1799002fc5117f3961997",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-rich-text",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "html": null
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Input Text Label",
-						"name": "input_text_name",
-						"order": "150",
-						"id": "92da7bf6dbc1799002fc5117f3961998",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": true,
-						"type": "now-input",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "type": "text",
-						  "placeholder": "testing testing",
-						  "tooltip": ""
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Dropdown Test 001",
-						"name": "Dropdown ",
-						"order": "400",
-						"id": "556bbf3adbc1799002fc5117f39619e2",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-select",
-						"has_message": false,
-						"has_options": true,
-						"options": [
-						  {
-							"id": "arianda_marks",
-							"label": "Arianda Marks"
-						  },
-						  {
-							"id": "nathalie_bright",
-							"label": "Nathalie Bright"
-						  },
-						  {
-							"id": "peter_balko",
-							"label": "Peter Balko"
-						  },
-						  {
-							"id": "sandra_bills",
-							"label": "Sandra Bills"
-						  },
-						  {
-							"id": "theophilus_same",
-							"label": "Theophilus Same"
-						  }
-						],
-						"properties": {
-						  "tooltip": "dropdown dropdown dropdow"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Multiple Select (list)",
-						"name": "Multiple select testing",
-						"order": "500",
-						"id": "0aabc447db45799002fc5117f3961973",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": true,
-						"type": "now-typeahead-multi-choice",
-						"has_message": false,
-						"has_options": true,
-						"options": [
-						  {
-							"id": "ariande_marks",
-							"label": "Ariande Big"
-						  },
-						  {
-							"id": "tola_banks",
-							"label": "Happy"
-						  },
-						  {
-							"id": "nathalie_bright",
-							"label": "Nathalie Small"
-						  },
-						  {
-							"id": "sandra_bills",
-							"label": "Sandra Up"
-						  },
-						  {
-							"id": "theo_same",
-							"label": "Theo Tall"
-						  }
-						],
-						"properties": {
-						  "tooltip": "testing testing testing ",
-						  "placeholder": ""
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Textarea Multine text test",
-						"name": "Textarea Multiline",
-						"order": "600",
-						"id": "a7d6b80fdb49799002fc5117f39619b8",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-textarea",
-						"has_message": true,
-						"message": {
-						  "status": "warning",
-						  "icon": "Yes",
-						  "content": "Choose your choice"
-						},
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "tooltip": "Testing testing testing",
-						  "show_counter": false,
-						  "maxlength": "400",
-						  "resize": "horizontal"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Input Text Single line ",
-						"name": "Input text for text",
-						"order": "700",
-						"id": "bc57b08fdb49799002fc5117f39619d8",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-input",
-						"has_message": true,
-						"message": {
-						  "status": "critical",
-						  "icon": "",
-						  "content": "Only text"
-						},
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "type": "text",
-						  "placeholder": "",
-						  "tooltip": "Only text please"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Input sinlge line",
-						"name": "Input single only number",
-						"order": "800",
-						"id": "7fc734cfdb49799002fc5117f396195d",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-input",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "type": "number",
-						  "placeholder": "33333",
-						  "tooltip": "Only number please"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Input single line",
-						"name": "Input for only email",
-						"order": "900",
-						"id": "dd487003db89799002fc5117f3961918",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-input",
-						"has_message": true,
-						"message": {
-						  "status": "info",
-						  "icon": "",
-						  "content": "only email"
-						},
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "type": "email",
-						  "placeholder": "sssss@gmail.com",
-						  "tooltip": "Only email please"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Input sinle line",
-						"name": "Input only date",
-						"order": "1000",
-						"id": "fd98b403db89799002fc5117f3961915",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-input",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "type": "date",
-						  "placeholder": "11-12-1997",
-						  "tooltip": "eneter only recent date please"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Radio test(Horizontal)",
-						"name": "Radio test ",
-						"order": "1100",
-						"id": "1ad8f003db89799002fc5117f3961927",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-radio-buttons",
-						"has_message": false,
-						"has_options": true,
-						"options": [
-						  {
-							"id": "today",
-							"label": "Today",
-							"checked": false
-						  },
-						  {
-							"id": "tomorrow",
-							"label": "Tomorrow",
-							"checked": false
-						  },
-						  {
-							"id": "yesterday",
-							"label": "Yesterday",
-							"checked": false
-						  },
-						  {
-							"id": "forever",
-							"label": "Forever",
-							"checked": false
-						  },
-						  {
-							"id": "sometimes",
-							"label": "Sometimes",
-							"checked": false
-						  }
-						],
-						"properties": {
-						  "layout": "horizontal",
-						  "tooltip": "",
-						  "size": "md"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Radio test 2(Vertical)",
-						"name": "Radio test 2",
-						"order": "1200",
-						"id": "a509b803db89799002fc5117f3961936",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-radio-buttons",
-						"has_message": false,
-						"has_options": true,
-						"options": [
-						  {
-							"id": "never",
-							"label": "Never",
-							"checked": false
-						  },
-						  {
-							"id": "sometimes",
-							"label": "Sometimes",
-							"checked": false
-						  },
-						  {
-							"id": "always",
-							"label": "Always",
-							"checked": false
-						  },
-						  {
-							"id": "day_before_yesterday",
-							"label": "Day before yesterday",
-							"checked": false
-						  },
-						  {
-							"id": "forevermore",
-							"label": "Forevermore",
-							"checked": false
-						  }
-						],
-						"properties": {
-						  "layout": "vertical",
-						  "tooltip": "",
-						  "size": "md"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Checkbox test (checked)",
-						"name": "Checkbox test",
-						"order": "1300",
-						"id": "5539f043db89799002fc5117f396196c",
-						"hideLabel": false,
-						"value": true,
-						"readOnly": false,
-						"required": true,
-						"type": "now-checkbox",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Checkbox test",
-						"name": "Checkbox (Not checked)",
-						"order": "1400",
-						"id": "f469f843db89799002fc5117f3961963",
-						"hideLabel": false,
-						"value": false,
-						"readOnly": false,
-						"required": true,
-						"type": "now-checkbox",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Togggle test (start and checked)",
-						"name": "Toggle test",
-						"order": "1500",
-						"id": "c0a97883db89799002fc5117f39619ee",
-						"hideLabel": false,
-						"value": true,
-						"readOnly": false,
-						"required": false,
-						"type": "now-toggle",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "sm",
-						  "labelPosition": "start"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Toggle button (end)",
-						"name": "Toggle ",
-						"order": "1600",
-						"id": "8dd97483db89799002fc5117f396190d",
-						"hideLabel": false,
-						"value": false,
-						"readOnly": false,
-						"required": true,
-						"type": "now-toggle",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md",
-						  "labelPosition": "end"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Toggle test (top)",
-						"name": "Toggle test",
-						"order": "1700",
-						"id": "c50af4c3db89799002fc5117f396196a",
-						"hideLabel": false,
-						"value": false,
-						"readOnly": false,
-						"required": false,
-						"type": "now-toggle",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md",
-						  "labelPosition": "top"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Toggle test (bottom and checked)",
-						"name": "Toggle test",
-						"order": "1800",
-						"id": "4b3a7007db89799002fc5117f39619c4",
-						"hideLabel": false,
-						"value": true,
-						"readOnly": false,
-						"required": false,
-						"type": "now-toggle",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md",
-						  "labelPosition": "bottom"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Rich text HTML",
-						"name": "Rich text HTML",
-						"order": "1900",
-						"id": "007afc83db89799002fc5117f3961961",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-rich-text",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "html": "<p>hhhhhhhhhhh</p>"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Checklist",
-						"name": "Checklist test",
-						"order": "2000",
-						"id": "0dea3047db89799002fc5117f3961996",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": true,
-						"type": "pwc-checklist",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "size": "md",
-						  "checklist": [
+					{
+						"name": "Phase 0 - DR -GI - Header",
+						"questions": [
 							{
-							  "label": "Technology 1",
-							  "id": "450789c7dbc9799002fc5117f3961912",
-							  "value": "false"
-							},
-							{
-							  "label": "Technology 2",
-							  "id": "0d17c9c7dbc9799002fc5117f39619c4",
-							  "value": "false"
-							},
-							{
-							  "label": "Technology 3",
-							  "id": "502789c7dbc9799002fc5117f39619d9",
-							  "value": "false"
-							},
-							{
-							  "label": "technology 4",
-							  "id": "eb2789c7dbc9799002fc5117f3961925",
-							  "value": "false"
-							},
-							{
-							  "label": "technology 5",
-							  "id": "fe3789c7dbc9799002fc5117f39619de",
-							  "value": "false"
+								"label": "General Information",
+								"name": "DR_General_information_label",
+								"order": "50",
+								"id": "08bc58511ba32d103ab10edacd4bcb17",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "header-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
 							}
-						  ],
-						  "tooltip": "",
-						  "placeholder": ""
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "URL Text (included)",
-						"name": "URL Text test",
-						"order": "2100",
-						"id": "ce0b7447db89799002fc5117f39619c5",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-input-url",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "url": "https://pwcgermanydev.service-now.com/now/nav/ui/classic/params/target/x_pwca2_0011077_question.do%3Fsys_id%3D-1%26sys_is_list%3Dtrue%26sys_is_related_list%3Dtrue%26sys_target%3Dx_pwca2_0011077_question%26sysparm_checked_items%3D%26sysparm_collection%3Dx_pwca2_0011077_question_set%26sysparm_collectionID%3D4aba7b3adbc1799002fc5117f39619c7%26sysparm_collection_key%3Dquestion_set%26sysparm_collection_label%3DQuestions%26sysparm_collection_related_field%3D%26sysparm_collection_related_file%3D%26sysparm_collection_related_relationship%3Dx_pwca2_0011077_question.question_set%26sysparm_collection_relationship%3D%26sysparm_fixed_query%3D%26sysparm_group_sort%3D%26sysparm_list_css%3D%26sysparm_query%3D%26sysparm_referring_url%3Dx_pwca2_0011077_question_set.do%253fsys_id%253d4aba7b3adbc1799002fc5117f39619c7%254099%2540sysparm_record_rows%253d166%254099%2540sysparm_record_target%253dx_pwca2_0011077_question_set%254099%2540sysparm_record_list%253dORDERBYname%254099%2540sysparm_record_row%253d159%26sysparm_target%3D%26sysparm_view%3D"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "URL text (not included)",
-						"name": "URL Text",
-						"order": "2200",
-						"id": "546bf047db89799002fc5117f3961985",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": true,
-						"type": "now-input-url",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "url": "https://"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Reference test",
-						"name": "Reference test",
-						"order": "2300",
-						"id": "d77b7c47db89799002fc5117f39619c5",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-typeahead",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "tooltip": "test test test",
-						  "placeholder": "",
-						  "type": "search",
-						  "table": "sys_user",
-						  "field": "name",
-						  "subfield": "email"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Reference multiple test",
-						"name": "reference multiple test",
-						"order": "2400",
-						"id": "68cb3887db89799002fc5117f3961966",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "now-typeahead-multi",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "tooltip": "test test",
-						  "placeholder": "",
-						  "type": "search",
-						  "table": "sys_user",
-						  "field": "name",
-						  "subfield": "email"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Attachment test",
-						"name": "Attachment test",
-						"order": "2500",
-						"id": "9eeb30c7db89799002fc5117f39619bb",
-						"hideLabel": false,
-						"value": {
-						  "recordID": "9eeb30c7db89799002fc5117f39619bb",
-						  "tableName": "x_pwca2_0011077_question",
-						  "maxFileSize": "15",
-						  "allowedFileTypes": "all",
-						  "attachedFiles": []
-						},
-						"readOnly": false,
-						"required": false,
-						"type": "pwc-attachment",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Contain base divider test",
-						"name": "Contain base divider test",
-						"order": "2600",
-						"id": "0c2cf4c7db89799002fc5117f39619de",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "container-base-divider",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "width": true,
-						  "padding": "sm"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Contain base divider test (Padding . medium and no full width)",
-						"name": "Contain base divider test",
-						"order": "2700",
-						"id": "c78cf40bdb89799002fc5117f3961989",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": false,
-						"type": "container-base-divider",
-						"has_message": false,
-						"has_options": false,
-						"options": [],
-						"properties": {
-						  "width": false,
-						  "padding": "md"
-						},
-						"has_dependency": false,
-						"dependency": {}
-					  },
-					  {
-						"label": "Select choice test",
-						"name": "Select choice test",
-						"order": "2800",
-						"id": "b04c7cc7db89799002fc5117f39619da",
-						"hideLabel": false,
-						"value": "",
-						"readOnly": false,
-						"required": true,
-						"type": "now-select",
-						"has_message": false,
-						"has_options": true,
-						"options": [
-						  {
-							"id": "ist_choice",
-							"label": "Ist choice"
-						  },
-						  {
-							"id": "nd_choice",
-							"label": "2nd choice"
-						  },
-						  {
-							"id": "rd_choice",
-							"label": "3rd choice"
-						  },
-						  {
-							"id": "4th_choice",
-							"label": "4th choice"
-						  },
-						  {
-							"id": "5th_choice",
-							"label": "5th choice"
-						  }
 						],
-						"properties": {
-						  "tooltip": "choos your choice"
-						},
+						"order": "100",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
 						"has_dependency": false,
 						"dependency": {}
-					  }
-					],
-					"order": 0,
-					"visible": true,
-					"pass_dependency": true,
-					"readOnly": false,
-					"hideLabel": false,
-					"has_dependency": false,
-					"dependency": {}
-				  }
+					},
+					{
+						"name": "Phase 0 - DR - GI - Technology Name",
+						"questions": [
+							{
+								"label": "What is the name of your technology?",
+								"name": "DR_Technology_name_label",
+								"order": "100",
+								"id": "08f31493db31615002fc5117f3961948",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Name Guidance",
+								"name": "DR_Tech Name Guidance",
+								"order": "110",
+								"id": "cc9ae3651b15f1501fb51f8f8b4bcbe6",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">If there is no official name for the technology yet, use a project name.<br /></span><span style=\"font-size: 10pt; background-color: rgb(var(--sn-tinymce_content-background,var(--now-form-field--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255))))); color: rgb(var(--sn-tinymce_content-text,var(--now-form-field--color,var(--now-color_text--primary,var(--now-color--neutral-18,22,27,28)))));\">There is also a </span><a style=\"font-size: 10pt; background-color: rgb(var(--sn-tinymce_content-background,var(--now-form-field--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255)))));\" href=\"https://brand.pwc.com/key-brand-guidelines/naming.html\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">naming guide with a Name Quick Checker</a><span style=\"font-size: 10pt; background-color: rgb(var(--sn-tinymce_content-background,var(--now-form-field--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255))))); color: rgb(var(--sn-tinymce_content-text,var(--now-form-field--color,var(--now-color_text--primary,var(--now-color--neutral-18,22,27,28)))));\"> to help you quickly find a name that meets our brand guidelines.</span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Name",
+								"name": "DR_Technology_name",
+								"order": "150",
+								"id": "49145093db31615002fc5117f3961977",
+								"hideLabel": true,
+								"type": "now-input",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"type": "text",
+									"placeholder": "",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "200",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - GI - Platform Responsible",
+						"questions": [
+							{
+								"label": "Which platform is responsible for your technology?",
+								"name": "DR_Platform_responsible_label",
+								"order": "175",
+								"id": "d296b67bdb247d10e75a64ebd396198a",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Responsible platform",
+								"name": "DR_Platform_responsible",
+								"order": "185",
+								"id": "8307767bdb247d10e75a64ebd396197b",
+								"hideLabel": true,
+								"type": "now-select",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": false,
+								"has_options": true,
+								"options": [
+									{
+										"id": "assurance_solutions",
+										"label": "Assurance Solutions (contact TRM before use)"
+									},
+									{
+										"id": "business_services_finance",
+										"label": "Business Services - Finance, Controlling & Engagement Mgmt. "
+									},
+									{
+										"id": "business_services_infrastructure",
+										"label": "Business Services - Infrastructure"
+									},
+									{
+										"id": "business_services_marketing",
+										"label": "Business Services - Marketing & Communication  "
+									},
+									{
+										"id": "business_services_ogc_rm",
+										"label": "Business Services - OGC/RM "
+									},
+									{
+										"id": "business_services_p_t",
+										"label": "Business Services - P&T "
+									},
+									{
+										"id": "business_services_people",
+										"label": "Business Services - People "
+									},
+									{
+										"id": "business_services_procurement",
+										"label": "Business Services - Procurement  "
+									},
+									{
+										"id": "cloud_and_digital",
+										"label": "Cloud & Digital"
+									},
+									{
+										"id": "deals",
+										"label": "Deals"
+									},
+									{
+										"id": "markets",
+										"label": "Markets"
+									},
+									{
+										"id": "risk_regulatory",
+										"label": "Risk & Regulatory"
+									},
+									{
+										"id": "strategy_and",
+										"label": "Strategy &"
+									},
+									{
+										"id": "sustainability",
+										"label": "Sustainability"
+									},
+									{
+										"id": "tax_legal_solutions",
+										"label": "Tax & Legal Solutions"
+									},
+									{
+										"id": "transformation",
+										"label": "Transformation  "
+									}
+								],
+								"properties": {
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "300",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - GI -Technology Team",
+						"questions": [
+							{
+								"label": "Technology Team",
+								"name": "DR_Technology_team_label",
+								"order": "280",
+								"id": "0cd42337db153550e75a64ebd396191f",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "header-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Who is the ultimately responsible person for the technology?",
+								"name": "DR_Technology_owner_label",
+								"order": "300",
+								"id": "d8d450d3db31615002fc5117f396199f",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Owner description",
+								"name": "DR_Technology_owner_description",
+								"order": "325",
+								"id": "102ce9101ba769103ab10edacd4bcb21",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p style=\"text-align: left;\"><span style=\"font-size: 10pt;\">According to global risk management regulations, the <strong>Technology Owner</strong> (usually Partner or Director) is <strong>ultimately responsible for the use</strong> of this technology.<br />The Technology Owner <strong>owns the application business wise</strong> and can describe and explain use cases and the business case. <br />This role is also known as Business Owner or Application Owner. </span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Owner",
+								"name": "DR_technology_owner_title",
+								"order": "330",
+								"id": "0bf1a1c6db253190e75a64ebd3961918",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-tertiary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Owner",
+								"name": "DR_Technology_owner",
+								"order": "350",
+								"id": "e0f49c93db31615002fc5117f39619f4",
+								"hideLabel": true,
+								"type": "now-typeahead",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": true,
+								"message": {
+									"status": "info",
+									"icon": "",
+									"content": "Please start typing a name to select a user."
+								},
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"tooltip": "",
+									"type": "search",
+									"table": "sys_user",
+									"field": "name",
+									"subfield": "email"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Who is the operational contact and manager for the technology?",
+								"name": "DR_Technology_manager_label",
+								"order": "400",
+								"id": "9115d8d3db31615002fc5117f39619b1",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Manager description",
+								"name": "DR_Technology_manager_description",
+								"order": "425",
+								"id": "2c5fe9501ba769103ab10edacd4bcb58",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">The Technology Manager will be responsible for <strong>providing information</strong> during the Technology Risk Assessment. </span><br /><span style=\"font-size: 10pt;\">The Technology Manager <strong>owns the application technology wise</strong> and can describe and explain business and technical backgrounds in detail. </span><br /><span style=\"font-size: 10pt;\">This role is also known as IT Application Owner, Product Manager or Service Manager. </span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Manager",
+								"name": "DR_technology_manager_title",
+								"order": "430",
+								"id": "06c2610adb253190e75a64ebd396195a",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-tertiary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Manager",
+								"name": "DR_Technology_manager",
+								"order": "450",
+								"id": "3c4598d3db31615002fc5117f3961933",
+								"hideLabel": true,
+								"type": "now-typeahead",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": true,
+								"message": {
+									"status": "info",
+									"icon": "",
+									"content": "Please start typing a name to select a user."
+								},
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"tooltip": "",
+									"type": "search",
+									"table": "sys_user",
+									"field": "name",
+									"subfield": "email"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "400",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - GI - Technology Funding",
+						"questions": [
+							{
+								"label": "Where is the funding for your technology coming from?",
+								"name": "DR_project_funding_label",
+								"order": "475",
+								"id": "cec295a0db743150e75a64ebd3961999",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Project funding",
+								"name": "DR_project_funding",
+								"order": "480",
+								"id": "1903dda0db743150e75a64ebd3961994",
+								"hideLabel": true,
+								"type": "now-radio-buttons",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": false,
+								"has_options": true,
+								"options": [
+									{
+										"id": "global",
+										"label": "Global",
+										"checked": false
+									},
+									{
+										"id": "network_emea_europe_etc",
+										"label": "Network (EMEA, Europe etc.) ",
+										"checked": false
+									},
+									{
+										"id": "pwc_germany",
+										"label": "PwC Germany",
+										"checked": false
+									}
+								],
+								"properties": {
+									"layout": "vertical",
+									"tooltip": "",
+									"size": "md"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "500",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - GI -Technology Sponsor",
+						"questions": [
+							{
+								"label": "Who  is the sponsor of your technology? ",
+								"name": "DR_Technology_sponsor_label",
+								"order": "500",
+								"id": "9645b1701b3b29103ab10edacd4bcba4",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Sponsor description",
+								"name": "DR_Technology_sponsor_description",
+								"order": "525",
+								"id": "2e6531301b3b29103ab10edacd4bcb57",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">The sponsor is responsible for <strong>funding and approving the business case</strong>, as well as being a key decision-maker at executive level. </span><br /><span style=\"font-size: 10pt;\">The sponsor provides financial or other resources to support the development, implementation and maintenance of the technology. </span><br /><span style=\"font-size: 10pt;\">This role is also known as business sponsor. </span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology sponsor global info",
+								"name": "DR_Technology_sponsor_global_info",
+								"order": "527",
+								"id": "b525d124db743150e75a64ebd39619ab",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt; color: #e03e2d;\">Please select a German sponsor representative as users from other territories currently do not have access to this application.</span></p>"
+								},
+								"has_dependency": true,
+								"dependency": {
+									"type": "simple",
+									"id": "1903dda0db743150e75a64ebd3961994",
+									"value": "pwc_germany",
+									"cond_type": "!=",
+									"left": "",
+									"right": ""
+								}
+							},
+							{
+								"label": "Technology Sponsor",
+								"name": "DR_Technology_sponsor_title",
+								"order": "530",
+								"id": "a413290adb253190e75a64ebd39619c1",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-tertiary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Sponsor",
+								"name": "DR_Technology_sponsor",
+								"order": "550",
+								"id": "44e579b01b3b29103ab10edacd4bcbd8",
+								"hideLabel": true,
+								"type": "now-typeahead",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": true,
+								"message": {
+									"status": "info",
+									"icon": "",
+									"content": "Please start typing a name to select a user."
+								},
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"tooltip": "",
+									"type": "search",
+									"table": "sys_user",
+									"field": "name",
+									"subfield": "email"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "600",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "COPY Phase 0 - DR - GI -Technology Sponsor",
+						"questions": [
+							{
+								"label": "Who  is the sponsor of your technology? ",
+								"name": "DR_Technology_sponsor_label",
+								"order": "500",
+								"id": "9645b1701b3b29103ab10edacd4bcba4",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Sponsor description",
+								"name": "DR_Technology_sponsor_description",
+								"order": "525",
+								"id": "2e6531301b3b29103ab10edacd4bcb57",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">The sponsor is responsible for <strong>funding and approving the business case</strong>, as well as being a key decision-maker at executive level. </span><br /><span style=\"font-size: 10pt;\">The sponsor provides financial or other resources to support the development, implementation and maintenance of the technology. </span><br /><span style=\"font-size: 10pt;\">This role is also known as business sponsor. </span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology sponsor global info",
+								"name": "DR_Technology_sponsor_global_info",
+								"order": "527",
+								"id": "b525d124db743150e75a64ebd39619ab",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt; color: #e03e2d;\">Please select a German sponsor representative as users from other territories currently do not have access to this application.</span></p>"
+								},
+								"has_dependency": true,
+								"dependency": {
+									"type": "simple",
+									"id": "1903dda0db743150e75a64ebd3961994",
+									"value": "pwc_germany",
+									"cond_type": "!=",
+									"left": "",
+									"right": ""
+								}
+							},
+							{
+								"label": "Technology Sponsor",
+								"name": "DR_Technology_sponsor_title",
+								"order": "530",
+								"id": "a413290adb253190e75a64ebd39619c1",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-tertiary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Technology Sponsor",
+								"name": "DR_Technology_sponsor",
+								"order": "550",
+								"id": "44e579b01b3b29103ab10edacd4bcbd8",
+								"hideLabel": true,
+								"type": "now-typeahead",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": true,
+								"message": {
+									"status": "info",
+									"icon": "",
+									"content": "Please start typing a name to select a user."
+								},
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"tooltip": "",
+									"type": "search",
+									"table": "sys_user",
+									"field": "name",
+									"subfield": "email"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "600",
+						"visible": false,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Section Divider",
+						"questions": [
+							{
+								"label": "Section Divider",
+								"name": "Section Divider",
+								"order": "100",
+								"id": "82acaf7b1b68fd103ab10edacd4bcb5c",
+								"hideLabel": true,
+								"type": "container-base-divider",
+								"value": "",
+								"readOnly": true,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"width": true,
+									"padding": "md"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "1500",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": true,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - Technology Scope Description",
+						"questions": [
+							{
+								"label": "Technology Short Description",
+								"name": "DR_technology_short_description_label",
+								"order": "50",
+								"id": "de97d7ed1b7fe9103ab10edacd4bcb74",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "header-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Please describe your technology in not more than three sentences?",
+								"name": "DR_short_description_label",
+								"order": "100",
+								"id": "5a8431301b3b29103ab10edacd4bcb3a",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Short description",
+								"name": "DR_short_description_guidance",
+								"order": "150",
+								"id": "4ba43dfc1bf729103ab10edacd4bcb89",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">Briefly describe the scope of your technology for someone who has never heard of it. Only a<strong> brief description</strong> is requested at this point, which we will display on the project details page. </span><span style=\"font-size: 10pt; background-color: rgb(var(--sn-tinymce_content-background,var(--now-form-field--background-color,var(--now-color_background--primary,var(--now-color--neutral-0,255,255,255))))); color: rgb(var(--sn-tinymce_content-text,var(--now-form-field--color,var(--now-color_text--primary,var(--now-color--neutral-18,22,27,28)))));\">After the technology risk assessment process has been started, a detailed description of your technology use case will be requested in a separate task.</span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Short Description",
+								"name": "DR_short_description ",
+								"order": "200",
+								"id": "b7b4f1701b3b29103ab10edacd4bcb81",
+								"hideLabel": true,
+								"type": "now-textarea",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": true,
+								"message": {
+									"status": "info",
+									"icon": "",
+									"content": "Try not to use more than 3 sentences"
+								},
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"tooltip": "",
+									"show_counter": true,
+									"maxlength": "500",
+									"resize": "vertical"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "2000",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Section Divider",
+						"questions": [
+							{
+								"label": "Section Divider",
+								"name": "Section Divider",
+								"order": "100",
+								"id": "82acaf7b1b68fd103ab10edacd4bcb5c",
+								"hideLabel": true,
+								"type": "container-base-divider",
+								"value": "",
+								"readOnly": true,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"width": true,
+									"padding": "md"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "2250",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": true,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Phase 0 - DR - Additional Informations",
+						"questions": [
+							{
+								"label": "Additional Information",
+								"name": "DR_usecase_label",
+								"order": "50",
+								"id": "8b06d2291b276d103ab10edacd4bcb0d",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "header-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Do you want to share any additional documentation?",
+								"name": "DR_additional_information_label",
+								"order": "500",
+								"id": "50e2f1f8dbcee55002fc5117f39619d5",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Guidance",
+								"name": "DR_additional_information_description_guidance",
+								"order": "525",
+								"id": "56362e651b676d103ab10edacd4bcb03",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">This could include things like pitch presentation, product information, concept paper, UI/UX designs, prototype/clickdummy etc.</span></p>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Additional Information",
+								"name": "DR_additional_information",
+								"order": "550",
+								"id": "65533df8dbcee55002fc5117f396199f",
+								"hideLabel": true,
+								"type": "now-radio-buttons",
+								"value": "",
+								"readOnly": false,
+								"required": true,
+								"has_message": false,
+								"has_options": true,
+								"options": [
+									{
+										"id": "yes",
+										"label": "Yes",
+										"checked": false
+									},
+									{
+										"id": "no",
+										"label": "No",
+										"checked": false
+									}
+								],
+								"properties": {
+									"layout": "horizontal",
+									"tooltip": "",
+									"size": "md"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Additional Information documentation",
+								"name": "DR_additional_information_documentation_label",
+								"order": "600",
+								"id": "c093fdf8dbcee55002fc5117f39619a1",
+								"hideLabel": true,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 10pt;\">Please upload any relevant documentation. Alternatively, you can provide us with a URL link in the text box below. </span></p>"
+								},
+								"has_dependency": true,
+								"dependency": {
+									"type": "simple",
+									"id": "65533df8dbcee55002fc5117f396199f",
+									"value": "yes",
+									"cond_type": "==",
+									"left": "",
+									"right": ""
+								}
+							},
+							{
+								"label": "Additional Information - URL",
+								"name": "DR_additional_information_documentation",
+								"order": "650",
+								"id": "caa3313cdbcee55002fc5117f396199d",
+								"hideLabel": false,
+								"type": "now-input-url",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"url": "https://"
+								},
+								"has_dependency": true,
+								"dependency": {
+									"type": "simple",
+									"id": "65533df8dbcee55002fc5117f396199f",
+									"value": "yes",
+									"cond_type": "==",
+									"left": "",
+									"right": ""
+								}
+							},
+							{
+								"label": "Additional Information Documentation Upload",
+								"name": "DR_additional_information_upload",
+								"order": "675",
+								"id": "8bb3fdf8dbcee55002fc5117f39619da",
+								"hideLabel": true,
+								"type": "pwc-attachment",
+								"value": {
+									"recordID": "67c23d101bee3910a221ddb7ab4bcb4f",
+									"tableName": "x_pwca2_0011077_values",
+									"maxFileSize": 15,
+									"allowedFileTypes": "all",
+									"attachedFiles": []
+								},
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {},
+								"has_dependency": true,
+								"dependency": {
+									"type": "simple",
+									"id": "65533df8dbcee55002fc5117f396199f",
+									"value": "yes",
+									"cond_type": "==",
+									"left": "",
+									"right": ""
+								}
+							}
+						],
+						"order": "6000",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					},
+					{
+						"name": "Lutz Test DP-779",
+						"questions": [
+							{
+								"label": "Text should only be visible when",
+								"name": "heading_name",
+								"order": "100",
+								"id": "15d6b3c8dbc6b15002fc5117f3961987",
+								"hideLabel": false,
+								"type": "now-heading",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"size": "title-secondary",
+									"tooltip": ""
+								},
+								"has_dependency": false,
+								"dependency": {}
+							},
+							{
+								"label": "Rich Text Label",
+								"name": "rich_text_name",
+								"order": "125",
+								"id": "9dd6b3c8dbc6b15002fc5117f3961987",
+								"hideLabel": false,
+								"type": "now-rich-text",
+								"value": "",
+								"readOnly": false,
+								"required": false,
+								"has_message": false,
+								"has_options": false,
+								"options": [],
+								"properties": {
+									"html": "<p><span style=\"font-size: 14pt; color: #e03e2d;\">This Text should be visible only if the related condition hits.</span></p>\r\n<p> </p>\r\n<table style=\"border-collapse: collapse; width: 100%; float: left;\" border=\"0\"><tbody><tr><td style=\"width: 66.6821%;\" colspan=\"2\">Here the text can be shown. Its 2/3  to 1/3</td><td style=\"width: 33.3025%;\">\r\n<p>Links you should Know about</p>\r\n<ul style=\"list-style-position: inside;\"><li><a href=\"https://googlede\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">Google Search</a></li></ul>\r\n</td></tr></tbody></table>"
+								},
+								"has_dependency": false,
+								"dependency": {}
+							}
+						],
+						"order": "100000",
+						"visible": true,
+						"pass_dependency": true,
+						"readOnly": false,
+						"hideLabel": false,
+						"has_dependency": false,
+						"dependency": {}
+					}
 				],
+				"external_questions_values": {},
 				"user_id": "00265235db6a259002fc5117f3961946",
-				"project_id": null
-			  }	
+				"project_id": "4bc2bd101bee3910a221ddb7ab4bcba0",
+				"active": true,
+				"has_values": true
+			}
 		},
 		disabled: {
 			default: false

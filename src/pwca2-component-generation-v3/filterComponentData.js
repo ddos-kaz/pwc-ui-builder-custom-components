@@ -2,10 +2,14 @@ import populateQuestionAnswerSet from './populateQuestionAnswerSet';
 import { createRef } from '@servicenow/ui-renderer-snabbdom';
 
 let qaSet = [];
+let extQuestionValues = {};
 
-export default function filterComponentData ( componentData, questionAnswerSet ) {
+export default function filterComponentData ( componentData, questionAnswerSet, externalQuestionsValues ) {
     qaSet = questionAnswerSet;
-    const { question_sets } = componentData;
+    extQuestionValues = externalQuestionsValues;
+    
+    let { question_sets } = componentData;
+    question_sets = question_sets.filter((question_set) => question_set.visible);
 
     question_sets.forEach((question_set) => {
         const { questions, has_dependency, dependency, visible } = question_set;
@@ -15,7 +19,7 @@ export default function filterComponentData ( componentData, questionAnswerSet )
             qsPassFiltering = false;
         }
 
-        if (visible) {            
+        if (visible == true || visible == "true") {            
             if (qsPassFiltering) {                
                 let filteredQuestions = questions.filter((question) => {                        
                     let passFiltering = false;
@@ -94,6 +98,8 @@ export default function filterComponentData ( componentData, questionAnswerSet )
         }                
     });
 
+    componentData.question_sets = question_sets;
+
     return componentData;
 }
 
@@ -115,17 +121,21 @@ const passDependency = (dependencyObj) => {
     }    
 
     if (dependencyObj.type == "simple") {
-        var index = getIndex(dependencyObj.id);
+        var index = getIndex(dependencyObj.id);        
 
-        if (index == -1) {
+        if (index == -1 && !extQuestionValues.hasOwnProperty(dependencyObj.id)) {
             return false;
         } else {
-            const qaSetValue = qaSet[index].value;
+            let qaSetValue = "";//qaSet[index].value;
+            if (index != -1) {
+                qaSetValue = qaSet[index].value;
+            } else if (extQuestionValues.hasOwnProperty(dependencyObj.id)) {
+                qaSetValue = extQuestionValues[dependencyObj.id];
+            }
             
             const dependencyValue = dependencyObj.value;
 
-            if (dependencyObj.cond_type == "==") {
-                 
+            if (dependencyObj.cond_type == "==") {                
                 if (Array.isArray(qaSetValue)) {
                     return (
                         qaSetValue.filter((val) => val.id == dependencyValue).length > 0

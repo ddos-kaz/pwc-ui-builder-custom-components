@@ -392,6 +392,8 @@ const buildRequiredQuestionsCard = ( state ) => {
         }
     });    
 
+    console.log(`requiredQuestions: ${JSON.stringify(requiredQuestions, null, '\t')}`);
+
     let title = "Click on the labels down below to see what information are mandatory and needs to be filled out.";
     
     /* if (isTaskTable) {

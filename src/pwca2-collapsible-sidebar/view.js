@@ -80,7 +80,7 @@ const generateSidebarMenuOptions = (isMobile, sidebarData, page, baseUrl, iconOn
  
 const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly) => {
     let menuOptionClass = "";// isMobile ? "pwc-menu-item-mbl" : "pwc-menu-item";
-    const url = menuOption.url.indexOf("https") == 0 ? menuOption.url : `${baseUrl}${menuOption.url}`;
+    const url = menuOption.ignoreBaseUrl ? menuOption.url : `${baseUrl}${menuOption.url}`;
     
     if (isMobile) {
         if (page == menuOption.url) {
@@ -100,15 +100,15 @@ const generateSidebarMenuOption = (isMobile, menuOption, page, baseUrl, iconOnly
 
     return (
         <div className={menuOptionClass} component-id={menuOption.id} id={menuOption.id} on-click={() => {
-            window.location.href = url;
+            //window.open(url, menuOption.target || "_self");
         }}>
             {isMobile ? (
-                <a href={url}>
+                <a href={url} target={menuOption.target || "_self"}>
                     <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon" title={menuOption.label}></now-icon>
                     <span className="pwc-tooltip">{menuOptionLabel}</span>
                 </a> 
             ) : (
-                <a href={url}>
+                <a href={url} target={menuOption.target || "_self"}>
                     <now-icon icon={menuOption.icon_name} size="md" className="pwc-menu-item-icon" title={menuOption.label}></now-icon>
                     <span className="pwc-menu-item-text">                        
                         {
