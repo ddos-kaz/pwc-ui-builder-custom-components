@@ -27,6 +27,7 @@
 
 .fullWidth {
     width: 95%;
+    max-height: 1000px;
 }
 
 .halfWidth {
@@ -55,6 +56,23 @@
   margin-bottom: 13px;
   margin-top: 13px;
   //gap: 5px;
+}
+
+.checkbox-container {
+  display: flex;
+  flex-direction: column;  
+  gap: 10px;
+}
+
+.checkboxes-container {
+  display: flex;
+  flex-direction: column;  
+  gap: 10px;
+}
+
+.checkbox-explanation-container {
+  padding-left: 23px;
+  color: grey;
 }
 
 .flex-column-container {
@@ -206,6 +224,7 @@
 
 .pwc-label-size {
   font-size: .75rem;
+  padding-bottom: 5px;
 }
 
 .required-icon {    

@@ -10,10 +10,8 @@ export default function populateData(
         return question_sets.reduce((set, {questions}) => set.concat(transformData(questions)), []);
     }    
     
-    
 	if (idValue.hasOwnProperty("id")) {
         const index = getIndex(questionAnswerSet, idValue.id);
-        //console.log(`operation: ${operation} : ${index}`);
         if (index == -1) {
             if (operation == "updateValue") {
                 if (idValue.type == "now-typeahead-multi" || idValue.type == "now-typeahead-multi-choice") {
@@ -86,6 +84,28 @@ const transformData = (questions) => {
             }
 
             return [...checklistOptions, ...set];
+        }
+
+        if (question.type == "now-radio-buttons") {
+            const radioOptionObj = {
+                "id": question.id,
+                "label": question.label,
+                "type": question.type
+            };
+
+            for (let index = 0; index < question.options.length; index++) {
+                const option = question.options[index];                
+                
+                if (option.checked == true || option.checked == "true") {
+                    radioOptionObj.value = option.id;
+                }
+            }
+            
+            if (!radioOptionObj.hasOwnProperty("value")) {
+                radioOptionObj.value = "";
+            }
+
+            return [radioOptionObj, ...set];
         }
 
         if (question.type == "now-input-url") {

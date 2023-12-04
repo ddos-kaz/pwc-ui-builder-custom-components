@@ -343,13 +343,13 @@ const dragDropFileForm = (updateState, state, attachmentConfig, id, ref, disable
 };
 
 const buildRequiredQuestionPill = (question) => {
-    const focusTextInput = () => {    
-        //console.log(`${question.label} - ${question.ref}`);
+    
+    const focusTextInput = () => {
         if (question.type == "pwc-attachment") {
             question.ref.current[0].focus();
         } else {
             question.ref.current.focus();
-        }        
+        }
     };
     //<input type="button" value={question.label} />
     return (
@@ -390,9 +390,7 @@ const buildRequiredQuestionsCard = ( state ) => {
                 })
             }            
         }
-    });    
-
-    console.log(`requiredQuestions: ${JSON.stringify(requiredQuestions, null, '\t')}`);
+    });
 
     let title = "Click on the labels down below to see what information are mandatory and needs to be filled out.";
     
@@ -677,7 +675,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                         return (
                             <li>
                                 <div className="now-heading-container">
-                                    <now-heading component-id={question.id} id={question.id} label={questionLabel} level="1" variant={question.properties.size} has-no-margin={true}></now-heading>
+                                    <now-heading component-id={question.id} id={question.id} label={questionLabel} level="1" variant={question.properties.size || ""} has-no-margin={true}></now-heading>
                                         
                                     {!hasToolTip ? (
                                         <div>                                                        
@@ -937,7 +935,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} placeholder={placeholder} config-aria={{}}></now-typeahead-multi> 
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value || []} search="contains" helper-content={question.tooltip} label={""} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} placeholder={placeholder} config-aria={{}}></now-typeahead-multi> 
                                     </div>                                
                                 </li>
                             ) : (
@@ -963,7 +961,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={options} selected-items={question.value || []} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
                                     </div>                                     
                                 </li>
                             )
@@ -1017,7 +1015,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  config-aria={{}}></now-typeahead-multi> 
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value || []} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]}  config-aria={{}}></now-typeahead-multi> 
                                     </div>                                
                                 </li>
                             ) : (
@@ -1043,7 +1041,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
                                         
-                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
+                                        <now-typeahead-multi ref={question.ref} className="halfWidth" component-id={question.id}  id={question.id} readonly={disabled || question.readOnly} size="md" items={question.options} selected-items={question.value || []} search="contains" helper-content={question.tooltip} label={""} placeholder={placeholder} config-aria={{}}></now-typeahead-multi>
                                     </div>                                     
                                 </li>
                             )
@@ -1214,7 +1212,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
 
-                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} readonly={disabled || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} resize={question.properties.resize} show-counter={question.properties.show_counter}></now-textarea>
+                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} disabled={disabled || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} messages={[{"status":question.message.status,"icon":question.message.icon,"content":question.message.content}]} resize={question.properties.resize} autoresize={true} show-counter={question.properties.show_counter}></now-textarea>
                                     </div>                                    
                                 </li>
                             ) : (
@@ -1251,7 +1249,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                             )
                                         }
 
-                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} readonly={disabled  || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} resize={question.properties.resize} show-counter={question.properties.show_counter}></now-textarea>
+                                        <now-textarea ref={question.ref} className="fullWidth" component-id={question.id} id={question.id} disabled={disabled  || question.readOnly} size="md" color="initial" label={""} value={question.value} maxlength={question.properties.maxlength} resize={question.properties.resize} autoresize={true} show-counter={question.properties.show_counter}></now-textarea>
                                     </div>                                    
                                 </li>
                             )
@@ -1363,6 +1361,7 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
 
                         return (
                             <div className="checklist-container">
+                                <now-heading label="" level={1} ref={question.ref} id={question.id} component-id={question.id} variant="title-tertiary"></now-heading>
                                 {
                                     hideLabel ? (
                                         <div>
@@ -1382,16 +1381,25 @@ const buildQuestionCard = ( updateState, state, question_set, disabled, dispatch
                                         </div>                                                                        
                                     )
                                 }
-                                
-                                {question.properties.checklist.map((checkbox) => {                                
-                                    const checkboxValue = (checkbox.value == "true" || checkbox.value == true) ? true : false;
 
-                                    return (
-                                        <li key={checkbox.id}>
-                                            <now-checkbox component-id={`${question.id}-${checkbox.id}`} id={checkbox.id} readonly={disabled || question.readOnly}  size="md" label={checkbox.label} checked={checkboxValue} value={checkbox.value}></now-checkbox>
-                                        </li>     
-                                    );
-                                })}
+                                <div className="checkboxes-container">
+                                    {question.properties.checklist.map((checkbox) => {                                
+                                        const checkboxValue = (checkbox.value == "true" || checkbox.value == true) ? true : false;
+                                        
+                                        return (
+                                            <div key={checkbox.id} className="checkbox-container">
+                                                <now-checkbox component-id={`${question.id}-${checkbox.id}`} id={checkbox.id} readonly={disabled || question.readOnly}  size="md" label={checkbox.label} checked={checkboxValue} value={checkbox.value}></now-checkbox>
+                                                {
+                                                    (checkbox.explanation != "" && checkbox.explanation != null) ? (
+                                                        <div className="checkbox-explanation-container">{checkbox.explanation}</div>
+                                                    ) : (
+                                                        <div></div>
+                                                    )
+                                                }                                            
+                                            </div>     
+                                        );
+                                    })}
+                                </div>                                 
                             </div>                            
                         );
                     }

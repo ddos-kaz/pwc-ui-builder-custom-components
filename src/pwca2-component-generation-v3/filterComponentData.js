@@ -8,8 +8,7 @@ export default function filterComponentData ( componentData, questionAnswerSet, 
     qaSet = questionAnswerSet;
     extQuestionValues = externalQuestionsValues;
     
-    let { question_sets } = componentData;
-    question_sets = question_sets.filter((question_set) => question_set.visible);
+    let { question_sets } = componentData;    
 
     question_sets.forEach((question_set) => {
         const { questions, has_dependency, dependency, visible } = question_set;
@@ -20,7 +19,7 @@ export default function filterComponentData ( componentData, questionAnswerSet, 
         }
 
         if (visible == true || visible == "true") {            
-            if (qsPassFiltering) {                
+            if (qsPassFiltering) {
                 let filteredQuestions = questions.filter((question) => {                        
                     let passFiltering = false;
         
@@ -82,7 +81,8 @@ export default function filterComponentData ( componentData, questionAnswerSet, 
         
                     return passFiltering;
                 });
-                
+                                
+
                 filteredQuestions = filteredQuestions.reduce((acc, question) => {
                     const newQuestion = {...{"ref": createRef()}, ...question};
 
@@ -97,8 +97,17 @@ export default function filterComponentData ( componentData, questionAnswerSet, 
             
         }                
     });
+    
+    const qs = [];
 
-    componentData.question_sets = question_sets;
+    for (let i = 0; i < question_sets.length; i++) {
+        const question_set = question_sets[i];
+        if (question_set.pass_dependency && question_set.visible) {
+            qs.push(question_set);
+        }
+    }
+    
+    componentData.question_sets = qs;
 
     return componentData;
 }
@@ -134,7 +143,7 @@ const passDependency = (dependencyObj) => {
             }
             
             const dependencyValue = dependencyObj.value;
-
+            
             if (dependencyObj.cond_type == "==") {                
                 if (Array.isArray(qaSetValue)) {
                     return (
